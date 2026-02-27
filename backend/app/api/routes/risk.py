@@ -13,6 +13,7 @@ from app.schemas.risk import RiskAssessRequest, RiskAssessmentOut
 from app.services.auth_service import get_current_user, require_doctor
 from app.services.interaction_service import analyze_drugs
 from app.services.risk_service import compute_risk_score, get_risk_label_color
+from app.services.recommendation_service import get_recommendations
 
 router = APIRouter(prefix="/api/risk", tags=["risk"])
 
@@ -53,11 +54,15 @@ async def assess_risk(
     await db.commit()
     await db.refresh(assessment)
     
+    recommendations = get_recommendations(breakdown["interactions"])
+    
     return {
         "assessment_id": assessment.id,
         "interaction_analysis": interaction_result,
         "risk_assessment": breakdown,
-        "label_color": get_risk_label_color(breakdown["risk_category"])
+        "label_color": get_risk_label_color(breakdown["risk_category"]),
+        "recommendations": recommendations,
+        "has_recommendations": len(recommendations) > 0
     }
 
 @router.get("/history")
@@ -113,8 +118,11 @@ async def get_assessment(
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to view this assessment")
 
     breakdown_dict = {}
+    recommendations = []
     try:
         breakdown_dict = json.loads(assessment.breakdown_json)
+        interactions = breakdown_dict.get("interactions", [])
+        recommendations = get_recommendations(interactions)
     except Exception:
         pass
         
@@ -122,7 +130,9 @@ async def get_assessment(
         **RiskAssessmentOut.model_validate(assessment).model_dump(),
         "breakdown": breakdown_dict,
         "medications_analyzed": json.loads(assessment.medications_analyzed),
-        "label_color": get_risk_label_color(assessment.risk_category)
+        "label_color": get_risk_label_color(assessment.risk_category),
+        "recommendations": recommendations,
+        "has_recommendations": len(recommendations) > 0
     }
 
 @router.get("/doctor/patients/summary")
