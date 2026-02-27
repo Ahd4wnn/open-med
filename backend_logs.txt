@@ -1,0 +1,514 @@
+﻿openmed_backend  | INFO:     Will watch for changes in these directories: ['/app']
+openmed_backend  | INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+openmed_backend  | INFO:     Started reloader process [1] using WatchFiles
+openmed_backend  | INFO:     Started server process [8]
+openmed_backend  | INFO:     Waiting for application startup.
+openmed_backend  | INFO:     Application startup complete.
+openmed_backend  | WARNING:  WatchFiles detected changes in 'app/services/drug_data.py'. Reloading...
+openmed_backend  | INFO:     Shutting down
+openmed_backend  | INFO:     Waiting for application shutdown.
+openmed_backend  | INFO:     Application shutdown complete.
+openmed_backend  | INFO:     Finished server process [8]
+openmed_backend  | INFO:     Started server process [18]
+openmed_backend  | INFO:     Waiting for application startup.
+openmed_backend  | INFO:     Application startup complete.
+openmed_backend  | WARNING:  WatchFiles detected changes in 'app/services/rxnav_service.py'. Reloading...
+openmed_backend  | INFO:     Shutting down
+openmed_backend  | INFO:     Waiting for application shutdown.
+openmed_backend  | INFO:     Application shutdown complete.
+openmed_backend  | INFO:     Finished server process [18]
+openmed_backend  | WARNING:  WatchFiles detected changes in 'app/services/rxnav_service.py'. Reloading...
+openmed_backend  | INFO:     Started server process [20]
+openmed_backend  | INFO:     Waiting for application startup.
+openmed_backend  | INFO:     Application startup complete.
+openmed_backend  | WARNING:  WatchFiles detected changes in 'app/services/interaction_service.py'. Reloading...
+openmed_backend  | INFO:     Shutting down
+openmed_backend  | INFO:     Waiting for application shutdown.
+openmed_backend  | INFO:     Application shutdown complete.
+openmed_backend  | INFO:     Finished server process [20]
+openmed_backend  | WARNING:  WatchFiles detected changes in 'app/api/routes/interactions.py'. Reloading...
+openmed_backend  | INFO:     Started server process [21]
+openmed_backend  | INFO:     Waiting for application startup.
+openmed_backend  | INFO:     Application startup complete.
+openmed_backend  | WARNING:  WatchFiles detected changes in 'app/api/routes/interactions.py'. Reloading...
+openmed_backend  | INFO:     Started server process [22]
+openmed_backend  | INFO:     Waiting for application startup.
+openmed_backend  | INFO:     Application startup complete.
+openmed_backend  | WARNING:  WatchFiles detected changes in 'app/main.py'. Reloading...
+openmed_backend  | INFO:     Started server process [23]
+openmed_backend  | INFO:     Waiting for application startup.
+openmed_backend  | INFO:     Application startup complete.
+openmed_backend  | INFO:     Started server process [24]
+openmed_backend  | INFO:     Waiting for application startup.
+openmed_backend  | INFO:     Application startup complete.
+openmed_backend  | INFO:     Shutting down
+openmed_backend  | INFO:     Waiting for application shutdown.
+openmed_backend  | INFO:     Application shutdown complete.
+openmed_backend  | INFO:     Finished server process [24]
+openmed_backend  | INFO:     Stopping reloader process [1]
+openmed_backend  | INFO:     Will watch for changes in these directories: ['/app']
+openmed_backend  | INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+openmed_backend  | INFO:     Started reloader process [1] using WatchFiles
+openmed_backend  | INFO:     Started server process [8]
+openmed_backend  | INFO:     Waiting for application startup.
+openmed_backend  | INFO:     Application startup complete.
+openmed_backend  | WARNING:  WatchFiles detected changes in 'app/schemas/risk.py'. Reloading...
+openmed_backend  | INFO:     Shutting down
+openmed_backend  | INFO:     Waiting for application shutdown.
+openmed_backend  | INFO:     Application shutdown complete.
+openmed_backend  | INFO:     Finished server process [8]
+openmed_backend  | INFO:     Started server process [10]
+openmed_backend  | INFO:     Waiting for application startup.
+openmed_backend  | INFO:     Application startup complete.
+openmed_backend  | WARNING:  WatchFiles detected changes in 'app/services/risk_service.py'. Reloading...
+openmed_backend  | INFO:     Shutting down
+openmed_backend  | INFO:     Waiting for application shutdown.
+openmed_backend  | INFO:     Application shutdown complete.
+openmed_backend  | INFO:     Finished server process [10]
+openmed_backend  | WARNING:  WatchFiles detected changes in 'app/services/risk_service.py'. Reloading...
+openmed_backend  | WARNING:  WatchFiles detected changes in 'app/api/routes/risk.py'. Reloading...
+openmed_backend  | INFO:     Started server process [12]
+openmed_backend  | INFO:     Waiting for application startup.
+openmed_backend  | INFO:     Application startup complete.
+openmed_backend  | INFO:     Started server process [13]
+openmed_backend  | INFO:     Waiting for application startup.
+openmed_backend  | INFO:     Application startup complete.
+openmed_backend  | WARNING:  WatchFiles detected changes in 'app/main.py'. Reloading...
+openmed_backend  | INFO:     Shutting down
+openmed_backend  | INFO:     Waiting for application shutdown.
+openmed_backend  | INFO:     Application shutdown complete.
+openmed_backend  | INFO:     Finished server process [13]
+openmed_backend  | INFO:     Started server process [14]
+openmed_backend  | INFO:     Waiting for application startup.
+openmed_backend  | INFO:     Application startup complete.
+openmed_backend  | INFO:     Shutting down
+openmed_backend  | INFO:     Waiting for application shutdown.
+openmed_backend  | INFO:     Application shutdown complete.
+openmed_backend  | INFO:     Finished server process [14]
+openmed_backend  | INFO:     Stopping reloader process [1]
+openmed_backend  | INFO:     Will watch for changes in these directories: ['/app']
+openmed_backend  | INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+openmed_backend  | INFO:     Started reloader process [1] using WatchFiles
+openmed_backend  | INFO:     Started server process [8]
+openmed_backend  | INFO:     Waiting for application startup.
+openmed_backend  | INFO:     Application startup complete.
+openmed_backend  | OpenMed API started
+openmed_backend  | INFO:     172.18.0.1:47978 - "OPTIONS /api/auth/register HTTP/1.1" 200 OK
+openmed_backend  | (trapped) error reading bcrypt version
+openmed_backend  | Traceback (most recent call last):
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/passlib/handlers/bcrypt.py", line 620, in _load_backend_mixin
+openmed_backend  |     version = _bcrypt.__about__.__version__
+openmed_backend  |               ^^^^^^^^^^^^^^^^^
+openmed_backend  | AttributeError: module 'bcrypt' has no attribute '__about__'
+openmed_backend  | INFO:     172.18.0.1:47978 - "POST /api/auth/register HTTP/1.1" 500 Internal Server Error
+openmed_backend  | ERROR:    Exception in ASGI application
+openmed_backend  | Traceback (most recent call last):
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/uvicorn/protocols/http/httptools_impl.py", line 411, in run_asgi
+openmed_backend  |     result = await app(  # type: ignore[func-returns-value]
+openmed_backend  |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/uvicorn/middleware/proxy_headers.py", line 69, in __call__
+openmed_backend  |     return await self.app(scope, receive, send)
+openmed_backend  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/fastapi/applications.py", line 1054, in __call__
+openmed_backend  |     await super().__call__(scope, receive, send)
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/starlette/applications.py", line 123, in __call__
+openmed_backend  |     await self.middleware_stack(scope, receive, send)
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/starlette/middleware/errors.py", line 186, in __call__
+openmed_backend  |     raise exc
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/starlette/middleware/errors.py", line 164, in __call__
+openmed_backend  |     await self.app(scope, receive, _send)
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/starlette/middleware/cors.py", line 93, in __call__
+openmed_backend  |     await self.simple_response(scope, receive, send, request_headers=headers)
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/starlette/middleware/cors.py", line 148, in simple_response
+openmed_backend  |     await self.app(scope, receive, send)
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/starlette/middleware/exceptions.py", line 65, in __call__
+openmed_backend  |     await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+openmed_backend  |     raise exc
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+openmed_backend  |     await app(scope, receive, sender)
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/starlette/routing.py", line 756, in __call__
+openmed_backend  |     await self.middleware_stack(scope, receive, send)
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/starlette/routing.py", line 776, in app
+openmed_backend  |     await route.handle(scope, receive, send)
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/starlette/routing.py", line 297, in handle
+openmed_backend  |     await self.app(scope, receive, send)
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/starlette/routing.py", line 77, in app
+openmed_backend  |     await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+openmed_backend  |     raise exc
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+openmed_backend  |     await app(scope, receive, sender)
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/starlette/routing.py", line 72, in app
+openmed_backend  |     response = await func(request)
+openmed_backend  |                ^^^^^^^^^^^^^^^^^^^
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/fastapi/routing.py", line 278, in app
+openmed_backend  |     raw_response = await run_endpoint_function(
+openmed_backend  |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/fastapi/routing.py", line 191, in run_endpoint_function
+openmed_backend  |     return await dependant.call(**values)
+openmed_backend  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openmed_backend  |   File "/app/app/api/routes/auth.py", line 19, in register
+openmed_backend  |     hashed_pw = hash_password(user_data.password)
+openmed_backend  |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openmed_backend  |   File "/app/app/services/auth_service.py", line 18, in hash_password
+openmed_backend  |     return pwd_context.hash(password)
+openmed_backend  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/passlib/context.py", line 2258, in hash
+openmed_backend  |     return record.hash(secret, **kwds)
+openmed_backend  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/passlib/utils/handlers.py", line 779, in hash
+openmed_backend  |     self.checksum = self._calc_checksum(secret)
+openmed_backend  |                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/passlib/handlers/bcrypt.py", line 591, in _calc_checksum
+openmed_backend  |     self._stub_requires_backend()
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/passlib/utils/handlers.py", line 2254, in _stub_requires_backend
+openmed_backend  |     cls.set_backend()
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/passlib/utils/handlers.py", line 2156, in set_backend
+openmed_backend  |     return owner.set_backend(name, dryrun=dryrun)
+openmed_backend  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/passlib/utils/handlers.py", line 2163, in set_backend
+openmed_backend  |     return cls.set_backend(name, dryrun=dryrun)
+openmed_backend  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/passlib/utils/handlers.py", line 2188, in set_backend
+openmed_backend  |     cls._set_backend(name, dryrun)
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/passlib/utils/handlers.py", line 2311, in _set_backend
+openmed_backend  |     super(SubclassBackendMixin, cls)._set_backend(name, dryrun)
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/passlib/utils/handlers.py", line 2224, in _set_backend
+openmed_backend  |     ok = loader(**kwds)
+openmed_backend  |          ^^^^^^^^^^^^^^
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/passlib/handlers/bcrypt.py", line 626, in _load_backend_mixin
+openmed_backend  |     return mixin_cls._finalize_backend_mixin(name, dryrun)
+openmed_backend  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/passlib/handlers/bcrypt.py", line 421, in _finalize_backend_mixin
+openmed_backend  |     if detect_wrap_bug(IDENT_2A):
+openmed_backend  |        ^^^^^^^^^^^^^^^^^^^^^^^^^
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/passlib/handlers/bcrypt.py", line 380, in detect_wrap_bug
+openmed_backend  |     if verify(secret, bug_hash):
+openmed_backend  |        ^^^^^^^^^^^^^^^^^^^^^^^^
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/passlib/utils/handlers.py", line 792, in verify
+openmed_backend  |     return consteq(self._calc_checksum(secret), chk)
+openmed_backend  |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/passlib/handlers/bcrypt.py", line 655, in _calc_checksum
+openmed_backend  |     hash = _bcrypt.hashpw(secret, config)
+openmed_backend  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openmed_backend  | ValueError: password cannot be longer than 72 bytes, truncate manually if necessary (e.g. my_password[:72])
+openmed_backend  | WARNING:  WatchFiles detected changes in 'app/main.py'. Reloading...
+openmed_backend  | INFO:     Shutting down
+openmed_backend  | INFO:     Waiting for application shutdown.
+openmed_backend  | INFO:     Application shutdown complete.
+openmed_backend  | INFO:     Finished server process [8]
+openmed_backend  | INFO:     Started server process [14]
+openmed_backend  | INFO:     Waiting for application startup.
+openmed_backend  | INFO:     Application startup complete.
+openmed_backend  | INFO:     Shutting down
+openmed_backend  | INFO:     Waiting for application shutdown.
+openmed_backend  | INFO:     Application shutdown complete.
+openmed_backend  | INFO:     Finished server process [14]
+openmed_backend  | INFO:     Stopping reloader process [1]
+openmed_backend  | INFO:     Will watch for changes in these directories: ['/app']
+openmed_backend  | INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+openmed_backend  | INFO:     Started reloader process [1] using WatchFiles
+openmed_backend  | INFO:     Started server process [8]
+openmed_backend  | INFO:     Waiting for application startup.
+openmed_backend  | INFO:     Application startup complete.
+openmed_backend  | (trapped) error reading bcrypt version
+openmed_backend  | Traceback (most recent call last):
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/passlib/handlers/bcrypt.py", line 620, in _load_backend_mixin
+openmed_backend  |     version = _bcrypt.__about__.__version__
+openmed_backend  |               ^^^^^^^^^^^^^^^^^
+openmed_backend  | AttributeError: module 'bcrypt' has no attribute '__about__'
+openmed_backend  | OpenMed API started
+openmed_backend  | INFO:     172.18.0.1:34172 - "POST /api/auth/register HTTP/1.1" 500 Internal Server Error
+openmed_backend  | ERROR:    Exception in ASGI application
+openmed_backend  | Traceback (most recent call last):
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/uvicorn/protocols/http/httptools_impl.py", line 411, in run_asgi
+openmed_backend  |     result = await app(  # type: ignore[func-returns-value]
+openmed_backend  |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/uvicorn/middleware/proxy_headers.py", line 69, in __call__
+openmed_backend  |     return await self.app(scope, receive, send)
+openmed_backend  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/fastapi/applications.py", line 1054, in __call__
+openmed_backend  |     await super().__call__(scope, receive, send)
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/starlette/applications.py", line 123, in __call__
+openmed_backend  |     await self.middleware_stack(scope, receive, send)
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/starlette/middleware/errors.py", line 186, in __call__
+openmed_backend  |     raise exc
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/starlette/middleware/errors.py", line 164, in __call__
+openmed_backend  |     await self.app(scope, receive, _send)
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/starlette/middleware/cors.py", line 93, in __call__
+openmed_backend  |     await self.simple_response(scope, receive, send, request_headers=headers)
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/starlette/middleware/cors.py", line 148, in simple_response
+openmed_backend  |     await self.app(scope, receive, send)
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/starlette/middleware/exceptions.py", line 65, in __call__
+openmed_backend  |     await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+openmed_backend  |     raise exc
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+openmed_backend  |     await app(scope, receive, sender)
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/starlette/routing.py", line 756, in __call__
+openmed_backend  |     await self.middleware_stack(scope, receive, send)
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/starlette/routing.py", line 776, in app
+openmed_backend  |     await route.handle(scope, receive, send)
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/starlette/routing.py", line 297, in handle
+openmed_backend  |     await self.app(scope, receive, send)
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/starlette/routing.py", line 77, in app
+openmed_backend  |     await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+openmed_backend  |     raise exc
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+openmed_backend  |     await app(scope, receive, sender)
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/starlette/routing.py", line 72, in app
+openmed_backend  |     response = await func(request)
+openmed_backend  |                ^^^^^^^^^^^^^^^^^^^
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/fastapi/routing.py", line 278, in app
+openmed_backend  |     raw_response = await run_endpoint_function(
+openmed_backend  |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/fastapi/routing.py", line 191, in run_endpoint_function
+openmed_backend  |     return await dependant.call(**values)
+openmed_backend  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openmed_backend  |   File "/app/app/api/routes/auth.py", line 19, in register
+openmed_backend  |     hashed_pw = hash_password(user_data.password)
+openmed_backend  |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openmed_backend  |   File "/app/app/services/auth_service.py", line 18, in hash_password
+openmed_backend  |     return pwd_context.hash(password)
+openmed_backend  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/passlib/context.py", line 2258, in hash
+openmed_backend  |     return record.hash(secret, **kwds)
+openmed_backend  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/passlib/utils/handlers.py", line 779, in hash
+openmed_backend  |     self.checksum = self._calc_checksum(secret)
+openmed_backend  |                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/passlib/handlers/bcrypt.py", line 591, in _calc_checksum
+openmed_backend  |     self._stub_requires_backend()
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/passlib/utils/handlers.py", line 2254, in _stub_requires_backend
+openmed_backend  |     cls.set_backend()
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/passlib/utils/handlers.py", line 2156, in set_backend
+openmed_backend  |     return owner.set_backend(name, dryrun=dryrun)
+openmed_backend  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/passlib/utils/handlers.py", line 2163, in set_backend
+openmed_backend  |     return cls.set_backend(name, dryrun=dryrun)
+openmed_backend  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/passlib/utils/handlers.py", line 2188, in set_backend
+openmed_backend  |     cls._set_backend(name, dryrun)
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/passlib/utils/handlers.py", line 2311, in _set_backend
+openmed_backend  |     super(SubclassBackendMixin, cls)._set_backend(name, dryrun)
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/passlib/utils/handlers.py", line 2224, in _set_backend
+openmed_backend  |     ok = loader(**kwds)
+openmed_backend  |          ^^^^^^^^^^^^^^
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/passlib/handlers/bcrypt.py", line 626, in _load_backend_mixin
+openmed_backend  |     return mixin_cls._finalize_backend_mixin(name, dryrun)
+openmed_backend  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/passlib/handlers/bcrypt.py", line 421, in _finalize_backend_mixin
+openmed_backend  |     if detect_wrap_bug(IDENT_2A):
+openmed_backend  |        ^^^^^^^^^^^^^^^^^^^^^^^^^
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/passlib/handlers/bcrypt.py", line 380, in detect_wrap_bug
+openmed_backend  |     if verify(secret, bug_hash):
+openmed_backend  |        ^^^^^^^^^^^^^^^^^^^^^^^^
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/passlib/utils/handlers.py", line 792, in verify
+openmed_backend  |     return consteq(self._calc_checksum(secret), chk)
+openmed_backend  |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/passlib/handlers/bcrypt.py", line 655, in _calc_checksum
+openmed_backend  |     hash = _bcrypt.hashpw(secret, config)
+openmed_backend  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openmed_backend  | ValueError: password cannot be longer than 72 bytes, truncate manually if necessary (e.g. my_password[:72])
+openmed_backend  | (trapped) error reading bcrypt version
+openmed_backend  | Traceback (most recent call last):
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/passlib/handlers/bcrypt.py", line 620, in _load_backend_mixin
+openmed_backend  |     version = _bcrypt.__about__.__version__
+openmed_backend  |               ^^^^^^^^^^^^^^^^^
+openmed_backend  | AttributeError: module 'bcrypt' has no attribute '__about__'
+openmed_backend  | INFO:     172.18.0.1:49720 - "POST /api/auth/register HTTP/1.1" 500 Internal Server Error
+openmed_backend  | ERROR:    Exception in ASGI application
+openmed_backend  | Traceback (most recent call last):
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/uvicorn/protocols/http/httptools_impl.py", line 411, in run_asgi
+openmed_backend  |     result = await app(  # type: ignore[func-returns-value]
+openmed_backend  |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/uvicorn/middleware/proxy_headers.py", line 69, in __call__
+openmed_backend  |     return await self.app(scope, receive, send)
+openmed_backend  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/fastapi/applications.py", line 1054, in __call__
+openmed_backend  |     await super().__call__(scope, receive, send)
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/starlette/applications.py", line 123, in __call__
+openmed_backend  |     await self.middleware_stack(scope, receive, send)
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/starlette/middleware/errors.py", line 186, in __call__
+openmed_backend  |     raise exc
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/starlette/middleware/errors.py", line 164, in __call__
+openmed_backend  |     await self.app(scope, receive, _send)
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/starlette/middleware/cors.py", line 93, in __call__
+openmed_backend  |     await self.simple_response(scope, receive, send, request_headers=headers)
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/starlette/middleware/cors.py", line 148, in simple_response
+openmed_backend  |     await self.app(scope, receive, send)
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/starlette/middleware/exceptions.py", line 65, in __call__
+openmed_backend  |     await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+openmed_backend  |     raise exc
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+openmed_backend  |     await app(scope, receive, sender)
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/starlette/routing.py", line 756, in __call__
+openmed_backend  |     await self.middleware_stack(scope, receive, send)
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/starlette/routing.py", line 776, in app
+openmed_backend  |     await route.handle(scope, receive, send)
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/starlette/routing.py", line 297, in handle
+openmed_backend  |     await self.app(scope, receive, send)
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/starlette/routing.py", line 77, in app
+openmed_backend  |     await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+openmed_backend  |     raise exc
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+openmed_backend  |     await app(scope, receive, sender)
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/starlette/routing.py", line 72, in app
+openmed_backend  |     response = await func(request)
+openmed_backend  |                ^^^^^^^^^^^^^^^^^^^
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/fastapi/routing.py", line 278, in app
+openmed_backend  |     raw_response = await run_endpoint_function(
+openmed_backend  |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/fastapi/routing.py", line 191, in run_endpoint_function
+openmed_backend  |     return await dependant.call(**values)
+openmed_backend  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openmed_backend  |   File "/app/app/api/routes/auth.py", line 19, in register
+openmed_backend  |     hashed_pw = hash_password(user_data.password)
+openmed_backend  |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openmed_backend  |   File "/app/app/services/auth_service.py", line 18, in hash_password
+openmed_backend  |     return pwd_context.hash(password)
+openmed_backend  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/passlib/context.py", line 2258, in hash
+openmed_backend  |     return record.hash(secret, **kwds)
+openmed_backend  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/passlib/utils/handlers.py", line 779, in hash
+openmed_backend  |     self.checksum = self._calc_checksum(secret)
+openmed_backend  |                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/passlib/handlers/bcrypt.py", line 591, in _calc_checksum
+openmed_backend  |     self._stub_requires_backend()
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/passlib/utils/handlers.py", line 2254, in _stub_requires_backend
+openmed_backend  |     cls.set_backend()
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/passlib/utils/handlers.py", line 2156, in set_backend
+openmed_backend  |     return owner.set_backend(name, dryrun=dryrun)
+openmed_backend  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/passlib/utils/handlers.py", line 2163, in set_backend
+openmed_backend  |     return cls.set_backend(name, dryrun=dryrun)
+openmed_backend  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/passlib/utils/handlers.py", line 2188, in set_backend
+openmed_backend  |     cls._set_backend(name, dryrun)
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/passlib/utils/handlers.py", line 2311, in _set_backend
+openmed_backend  |     super(SubclassBackendMixin, cls)._set_backend(name, dryrun)
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/passlib/utils/handlers.py", line 2224, in _set_backend
+openmed_backend  |     ok = loader(**kwds)
+openmed_backend  |          ^^^^^^^^^^^^^^
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/passlib/handlers/bcrypt.py", line 626, in _load_backend_mixin
+openmed_backend  |     return mixin_cls._finalize_backend_mixin(name, dryrun)
+openmed_backend  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/passlib/handlers/bcrypt.py", line 421, in _finalize_backend_mixin
+openmed_backend  |     if detect_wrap_bug(IDENT_2A):
+openmed_backend  |        ^^^^^^^^^^^^^^^^^^^^^^^^^
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/passlib/handlers/bcrypt.py", line 380, in detect_wrap_bug
+openmed_backend  |     if verify(secret, bug_hash):
+openmed_backend  |        ^^^^^^^^^^^^^^^^^^^^^^^^
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/passlib/utils/handlers.py", line 792, in verify
+openmed_backend  |     return consteq(self._calc_checksum(secret), chk)
+openmed_backend  |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/passlib/handlers/bcrypt.py", line 655, in _calc_checksum
+openmed_backend  |     hash = _bcrypt.hashpw(secret, config)
+openmed_backend  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openmed_backend  | ValueError: password cannot be longer than 72 bytes, truncate manually if necessary (e.g. my_password[:72])
+openmed_backend  | (trapped) error reading bcrypt version
+openmed_backend  | Traceback (most recent call last):
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/passlib/handlers/bcrypt.py", line 620, in _load_backend_mixin
+openmed_backend  |     version = _bcrypt.__about__.__version__
+openmed_backend  |               ^^^^^^^^^^^^^^^^^
+openmed_backend  | AttributeError: module 'bcrypt' has no attribute '__about__'
+openmed_backend  | INFO:     172.18.0.1:47754 - "POST /api/auth/register HTTP/1.1" 500 Internal Server Error
+openmed_backend  | ERROR:    Exception in ASGI application
+openmed_backend  | Traceback (most recent call last):
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/uvicorn/protocols/http/httptools_impl.py", line 411, in run_asgi
+openmed_backend  |     result = await app(  # type: ignore[func-returns-value]
+openmed_backend  |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/uvicorn/middleware/proxy_headers.py", line 69, in __call__
+openmed_backend  |     return await self.app(scope, receive, send)
+openmed_backend  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/fastapi/applications.py", line 1054, in __call__
+openmed_backend  |     await super().__call__(scope, receive, send)
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/starlette/applications.py", line 123, in __call__
+openmed_backend  |     await self.middleware_stack(scope, receive, send)
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/starlette/middleware/errors.py", line 186, in __call__
+openmed_backend  |     raise exc
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/starlette/middleware/errors.py", line 164, in __call__
+openmed_backend  |     await self.app(scope, receive, _send)
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/starlette/middleware/cors.py", line 93, in __call__
+openmed_backend  |     await self.simple_response(scope, receive, send, request_headers=headers)
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/starlette/middleware/cors.py", line 148, in simple_response
+openmed_backend  |     await self.app(scope, receive, send)
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/starlette/middleware/exceptions.py", line 65, in __call__
+openmed_backend  |     await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+openmed_backend  |     raise exc
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+openmed_backend  |     await app(scope, receive, sender)
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/starlette/routing.py", line 756, in __call__
+openmed_backend  |     await self.middleware_stack(scope, receive, send)
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/starlette/routing.py", line 776, in app
+openmed_backend  |     await route.handle(scope, receive, send)
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/starlette/routing.py", line 297, in handle
+openmed_backend  |     await self.app(scope, receive, send)
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/starlette/routing.py", line 77, in app
+openmed_backend  |     await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+openmed_backend  |     raise exc
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+openmed_backend  |     await app(scope, receive, sender)
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/starlette/routing.py", line 72, in app
+openmed_backend  |     response = await func(request)
+openmed_backend  |                ^^^^^^^^^^^^^^^^^^^
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/fastapi/routing.py", line 278, in app
+openmed_backend  |     raw_response = await run_endpoint_function(
+openmed_backend  |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/fastapi/routing.py", line 191, in run_endpoint_function
+openmed_backend  |     return await dependant.call(**values)
+openmed_backend  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openmed_backend  |   File "/app/app/api/routes/auth.py", line 19, in register
+openmed_backend  |     hashed_pw = hash_password(user_data.password)
+openmed_backend  |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openmed_backend  |   File "/app/app/services/auth_service.py", line 18, in hash_password
+openmed_backend  |     return pwd_context.hash(password)
+openmed_backend  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/passlib/context.py", line 2258, in hash
+openmed_backend  |     return record.hash(secret, **kwds)
+openmed_backend  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/passlib/utils/handlers.py", line 779, in hash
+openmed_backend  |     self.checksum = self._calc_checksum(secret)
+openmed_backend  |                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/passlib/handlers/bcrypt.py", line 591, in _calc_checksum
+openmed_backend  |     self._stub_requires_backend()
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/passlib/utils/handlers.py", line 2254, in _stub_requires_backend
+openmed_backend  |     cls.set_backend()
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/passlib/utils/handlers.py", line 2156, in set_backend
+openmed_backend  |     return owner.set_backend(name, dryrun=dryrun)
+openmed_backend  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/passlib/utils/handlers.py", line 2163, in set_backend
+openmed_backend  |     return cls.set_backend(name, dryrun=dryrun)
+openmed_backend  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/passlib/utils/handlers.py", line 2188, in set_backend
+openmed_backend  |     cls._set_backend(name, dryrun)
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/passlib/utils/handlers.py", line 2311, in _set_backend
+openmed_backend  |     super(SubclassBackendMixin, cls)._set_backend(name, dryrun)
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/passlib/utils/handlers.py", line 2224, in _set_backend
+openmed_backend  |     ok = loader(**kwds)
+openmed_backend  |          ^^^^^^^^^^^^^^
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/passlib/handlers/bcrypt.py", line 626, in _load_backend_mixin
+openmed_backend  |     return mixin_cls._finalize_backend_mixin(name, dryrun)
+openmed_backend  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/passlib/handlers/bcrypt.py", line 421, in _finalize_backend_mixin
+openmed_backend  |     if detect_wrap_bug(IDENT_2A):
+openmed_backend  |        ^^^^^^^^^^^^^^^^^^^^^^^^^
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/passlib/handlers/bcrypt.py", line 380, in detect_wrap_bug
+openmed_backend  |     if verify(secret, bug_hash):
+openmed_backend  |        ^^^^^^^^^^^^^^^^^^^^^^^^
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/passlib/utils/handlers.py", line 792, in verify
+openmed_backend  |     return consteq(self._calc_checksum(secret), chk)
+openmed_backend  |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/passlib/handlers/bcrypt.py", line 655, in _calc_checksum
+openmed_backend  |     hash = _bcrypt.hashpw(secret, config)
+openmed_backend  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openmed_backend  | ValueError: password cannot be longer than 72 bytes, truncate manually if necessary (e.g. my_password[:72])
+openmed_backend  | INFO:     172.18.0.1:59828 - "OPTIONS /api/auth/login HTTP/1.1" 200 OK
+openmed_backend  | INFO:     172.18.0.1:59828 - "POST /api/auth/login HTTP/1.1" 401 Unauthorized
