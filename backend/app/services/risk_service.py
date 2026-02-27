@@ -93,7 +93,7 @@ def calculate_base_interaction_score(interactions: list[dict]) -> Tuple[float, s
 
 def compute_risk_score(interaction_result: dict, patient_profile: Optional[Any]) -> dict:
     interactions = interaction_result.get("interactions", [])
-    drugs_analyzed = interaction_result.get("drugs_analyzed", [])
+    interactions_input_drugs = interaction_result.get("drugs_analyzed", [])
     
     base_score, base_exp = calculate_base_interaction_score(interactions)
     
@@ -116,28 +116,109 @@ def compute_risk_score(interaction_result: dict, patient_profile: Optional[Any])
         category = "Severe"
         
     clinical_flags = []
-    if final_score >= 55.0:
-        clinical_flags.append("HIGH RISK: Immediate clinical review recommended.")
-        
-    for inter in interactions:
-        if inter["severity"] == "contraindicated":
-            clinical_flags.append(f"CONTRAINDICATED PAIR DETECTED: {inter['drug_1']} + {inter['drug_2']}. Do not co-administer.")
-        elif inter["severity"] == "major":
-            clinical_flags.append(f"MAJOR INTERACTION: {inter['drug_1']} + {inter['drug_2']} — {inter.get('recommendation', '')}")
-            
+
+    # Flag 1 — Score based (ANY significant score)
+    if final_score >= 55:
+        clinical_flags.append(
+            "HIGH RISK: Immediate clinical review recommended."
+        )
+    elif final_score >= 25:
+        clinical_flags.append(
+            "MODERATE RISK: Clinically significant interactions "
+            "detected. Review your medication regimen."
+        )
+
+    # Flag 2 — Contraindicated pairs (ALWAYS flag)
+    for interaction in interactions:
+        if interaction.get("severity") == "contraindicated":
+            clinical_flags.append(
+                f"CONTRAINDICATED: {interaction['drug_1'].title()} "
+                f"+ {interaction['drug_2'].title()} should NOT "
+                f"be taken together."
+            )
+
+    # Flag 3 — Major interactions (ALWAYS flag)
+    for interaction in interactions:
+        if interaction.get("severity") == "major":
+            clinical_flags.append(
+                f"MAJOR INTERACTION: "
+                f"{interaction['drug_1'].title()} + "
+                f"{interaction['drug_2'].title()} — "
+                f"{interaction.get('recommendation', 'Consult your physician.')}"
+            )
+
+    # Flag 4 — Moderate interactions (flag if 2 or more)
+    moderate_interactions = [
+        i for i in interactions 
+        if i.get("severity") == "moderate"
+    ]
+    if len(moderate_interactions) >= 2:
+        clinical_flags.append(
+            f"MULTIPLE MODERATE INTERACTIONS: "
+            f"{len(moderate_interactions)} moderate interactions "
+            f"detected. Combined effect may be significant."
+        )
+    elif len(moderate_interactions) == 1:
+        i = moderate_interactions[0]
+        clinical_flags.append(
+            f"MODERATE INTERACTION: "
+            f"{i['drug_1'].title()} + {i['drug_2'].title()} — "
+            f"{i.get('recommendation', 'Monitor closely.')}"
+        )
+
+    # Flag 5 — Patient parameter flags
     if kidney_mult >= 1.9:
-        clinical_flags.append("RENAL IMPAIRMENT: Renally-cleared drugs may accumulate to toxic levels.")
+        clinical_flags.append(
+            "RENAL IMPAIRMENT: Renally-cleared drugs may "
+            "accumulate to toxic levels."
+        )
+    elif kidney_mult >= 1.5:
+        clinical_flags.append(
+            "REDUCED KIDNEY FUNCTION: Monitor drug levels "
+            "and watch for side effects."
+        )
+
     if liver_mult >= 1.4:
-        clinical_flags.append("HEPATIC IMPAIRMENT: CYP450-metabolized drugs may accumulate.")
+        clinical_flags.append(
+            "HEPATIC IMPAIRMENT: CYP450-metabolized drugs "
+            "may accumulate."
+        )
+
     if age_mult >= 1.5:
-        clinical_flags.append("ELDERLY PATIENT: Enhanced sensitivity to drug interactions.")
+        clinical_flags.append(
+            "ELDERLY PATIENT: Enhanced sensitivity to "
+            "drug interactions."
+        )
+
     if poly_mult >= 1.45:
-        clinical_flags.append("HIGH POLYPHARMACY LOAD: Consider medication reconciliation.")
-        
-    if category == "Low":
-        recommendation = "Current medication combination appears relatively safe. Continue regular monitoring."
+        clinical_flags.append(
+            "HIGH POLYPHARMACY LOAD: Consider medication "
+            "reconciliation with your doctor."
+        )
+
+    # Flag 6 — Many drugs even without known interactions
+    drug_count = len(interactions_input_drugs if interactions_input_drugs else [])
+    if len(interactions) == 0 and drug_count >= 5:
+        clinical_flags.append(
+            f"POLYPHARMACY ALERT: You are taking {drug_count} "
+            f"medications. Even without known interactions, "
+            f"regular review is recommended."
+        )
+    
+    # Check if interactions list is empty but total > 0
+    total = interaction_result.get("total_interactions", 0)
+    if total > 0 and len(interactions) == 0:
+        clinical_flags.append(
+            f"INTERACTIONS DETECTED: {total} drug interaction(s) "
+            f"found. Run a full analysis for details."
+        )
+
+    if category == "Low" and len(interactions) == 0:
+        recommendation = "Current medication combination appears safe. Continue regular monitoring."
+    elif category == "Low" and len(interactions) > 0:
+        recommendation = "Minor interactions detected. Continue with standard monitoring."
     elif category == "Moderate":
-        recommendation = "Clinically significant interactions detected. Review medication regimen with prescribing physician."
+        recommendation = "Clinically significant interactions detected. Review your medication regimen with your doctor."
     else:
         recommendation = "HIGH RISK COMBINATION. Immediate medication review required. Do not proceed without specialist consultation."
 

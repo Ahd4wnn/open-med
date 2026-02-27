@@ -6,6 +6,7 @@ import Badge from '../../components/shared/Badge';
 import Button from '../../components/shared/Button';
 import LoadingSpinner from '../../components/shared/LoadingSpinner';
 import { riskService } from '../../services/api';
+import { Clock } from "lucide-react";
 
 const PatientHistoryPage = () => {
     const navigate = useNavigate();
@@ -45,7 +46,7 @@ const PatientHistoryPage = () => {
 
             {history.length === 0 ? (
                 <div className="py-16 flex flex-col items-center justify-center text-center">
-                    <svg className="text-[#D1D1D6] mb-4" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                    <Clock className="text-[#D1D1D6] mb-4" size={48} />
                     <h3 className="text-lg font-semibold text-[#1D1D1F]">No checks yet</h3>
                     <p className="text-[#86868B] mt-1 mb-6">You haven't checked any medications for interactions.</p>
                     <Button onClick={() => navigate('/patient/medications')}>Check Medications</Button>
@@ -57,7 +58,7 @@ const PatientHistoryPage = () => {
                         const drugs = assessment.drug_names;
                         const visibleDrugs = drugs.slice(0, 4);
                         const remaining = drugs.length > 4 ? drugs.length - 4 : 0;
-                        const badgeColor = assessment.final_risk_category === 'Severe' ? 'red' : assessment.final_risk_category === 'Moderate' ? 'yellow' : 'green';
+                        const badgeColor = assessment.risk_category === 'Severe' ? 'red' : assessment.risk_category === 'Moderate' ? 'yellow' : 'green';
 
                         return (
                             <Card key={assessment.id} className="p-5 hover:shadow-md transition-shadow">
@@ -82,12 +83,12 @@ const PatientHistoryPage = () => {
 
                                 {/* Middle Row */}
                                 <div className="flex items-center gap-4">
-                                    <span className="font-bold text-2xl leading-none" style={{ color: assessment.label_color }}>
-                                        {assessment.final_risk_score.toFixed(1)}
+                                    <span className="font-bold text-2xl leading-none" style={{ color: assessment.risk_category === 'Moderate' ? '#FF9F0A' : assessment.label_color }}>
+                                        {assessment.risk_score?.toFixed(1) || '0'}
                                     </span>
-                                    <Badge color={badgeColor}>{assessment.final_risk_category}</Badge>
+                                    <Badge color={badgeColor}>{assessment.risk_category}</Badge>
                                     <span className="text-sm text-[#86868B] ml-2">
-                                        {assessment.total_interactions} interaction(s)
+                                        {assessment.interaction_count} interaction(s)
                                     </span>
                                 </div>
 
@@ -96,9 +97,9 @@ const PatientHistoryPage = () => {
                                     {isExpanded ? (
                                         <div className="animate-in fade-in slide-in-from-top-2 duration-200">
                                             {/* Flags */}
-                                            {assessment.clinical_flags && assessment.clinical_flags.length > 0 && (
+                                            {assessment?.breakdown?.clinical_flags && assessment.breakdown.clinical_flags.length > 0 && (
                                                 <div className="mb-4 space-y-2">
-                                                    {assessment.clinical_flags.map((flag, i) => (
+                                                    {assessment.breakdown.clinical_flags.map((flag, i) => (
                                                         <div key={i} className="flex gap-2 text-sm text-[#FF3B30]">
                                                             <span className="shrink-0">•</span>
                                                             <span>{flag}</span>
@@ -108,17 +109,12 @@ const PatientHistoryPage = () => {
                                             )}
 
                                             {/* Top Interactions (Simplified) */}
-                                            {assessment.interactions && assessment.interactions.length > 0 && (
+                                            {assessment?.breakdown?.recommendation && (
                                                 <div className="space-y-3 mb-4">
-                                                    {assessment.interactions.slice(0, 2).map((interaction, i) => (
-                                                        <div key={i} className="text-sm">
-                                                            <span className="font-medium text-[#1D1D1F]">⚠ {interaction.drug1} + {interaction.drug2}</span>
-                                                            <p className="text-[#515154] mt-1 text-xs">{interaction.recommendation || "Consult your provider regarding this mix."}</p>
-                                                        </div>
-                                                    ))}
-                                                    {assessment.interactions.length > 2 && (
-                                                        <p className="text-xs text-[#86868B] italic">...and {assessment.interactions.length - 2} more minor interactions.</p>
-                                                    )}
+                                                    <div className="text-sm">
+                                                        <span className="font-medium text-[#1D1D1F]">Summary</span>
+                                                        <p className="text-[#515154] mt-1 text-xs">{assessment.breakdown.recommendation}</p>
+                                                    </div>
                                                 </div>
                                             )}
 

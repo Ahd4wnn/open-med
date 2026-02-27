@@ -6,6 +6,7 @@ import Badge from '../../components/shared/Badge';
 import Button from '../../components/shared/Button';
 import LoadingSpinner from '../../components/shared/LoadingSpinner';
 import { riskService } from '../../services/api';
+import { Pill } from "lucide-react";
 
 const DoctorDashboard = () => {
     const navigate = useNavigate();
@@ -76,7 +77,7 @@ const DoctorDashboard = () => {
                 </Card>
                 <Card className="px-5 py-4">
                     <h3 className="text-[11px] uppercase tracking-wider text-[var(--color-text-muted)] font-semibold">Avg Risk Score</h3>
-                    <p className="text-[32px] font-bold text-[var(--color-text-primary)] mt-1">{avgRiskScore.toFixed(1)}</p>
+                    <p className="text-[32px] font-bold text-[var(--color-text-primary)] mt-1">{avgRiskScore?.toFixed(1) || '0.0'}</p>
                     <p className="text-xs text-[var(--color-text-secondary)] mt-1">Across all patients</p>
                 </Card>
             </div>
@@ -110,7 +111,7 @@ const DoctorDashboard = () => {
                                             return (
                                                 <tr key={idx} className="border-b border-[var(--color-border)] last:border-0 hover:bg-[#F9F9FB] transition-colors">
                                                     <td className="px-4 py-3 text-sm font-medium text-[var(--color-text-primary)]">{patient.patient_name}</td>
-                                                    <td className="px-4 py-3 text-sm text-[var(--color-text-primary)]">{patient.latest_risk_score.toFixed(1)}</td>
+                                                    <td className="px-4 py-3 text-sm text-[var(--color-text-primary)]">{patient?.latest_risk_score?.toFixed(1) || '0.0'}</td>
                                                     <td className="px-4 py-3"><Badge color={badgeColor}>{patient.latest_risk_category}</Badge></td>
                                                     <td className="px-4 py-3 text-sm text-[var(--color-text-secondary)]">
                                                         {new Date(patient.latest_assessment_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
@@ -169,7 +170,7 @@ const DoctorDashboard = () => {
                                         return (
                                             <div key={idx} className="flex justify-between items-center pb-3 border-b border-[#EBEBED] last:border-0 last:pb-0">
                                                 <div className="flex items-center gap-2">
-                                                    <svg className="text-[#86868B]" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.5 20.5 7 24l-3-3L.5 17.5M10.5 20.5l4-4L11 13l-4 4-3.5 3.5M10.5 20.5l3.5-3.5"></path><path d="M14.5 16.5l3.5-3.5L14 9l-3.5 3.5"></path><path d="M18 13l3.5-3.5a3.536 3.536 0 0 0-5-5L13 8l5 5z"></path></svg>
+                                                    <Pill size={14} className="text-[#86868B]" />
                                                     <span className="text-sm text-[var(--color-text-primary)]" title={drugList}>{truncatedDrugs}</span>
                                                 </div>
                                                 <div className="flex flex-col items-end">

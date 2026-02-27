@@ -1,4 +1,5 @@
 import React from 'react';
+import { AlertTriangle } from "lucide-react";
 import Card from './Card';
 import Badge from './Badge';
 
@@ -9,7 +10,7 @@ const RecommendationCard = ({ recommendation }) => {
         <Card className="border-l-[3px] border-l-[#FF9500] bg-[#FFFBEB] rounded-r-xl p-4 mb-3 shadow-none">
             <div className="flex items-start justify-between mb-1">
                 <div className="flex items-center gap-2">
-                    <svg className="text-[#FF9500] mt-0.5 shrink-0" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m11.73 4.14.07-.14a2 2 0 0 1 3.4 0l7.53 13.04a2 2 0 0 1-1.7 3H3a2 2 0 0 1-1.7-3z"></path><line x1="12" x2="12" y1="9" y2="13"></line><line x1="12" x2="12.01" y1="17" y2="17"></line></svg>
+                    <AlertTriangle size={16} className="text-[#FF9500] mt-0.5 shrink-0" />
                     <h4 className="text-sm font-semibold text-[#1D1D1F]">
                         {recommendation.problematic_drug} may interact with {recommendation.interacts_with}
                     </h4>

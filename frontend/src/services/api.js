@@ -46,6 +46,8 @@ export const interactionService = {
     getHistory: () => api.get("/api/interactions/history"),
     searchDrugs: (query) =>
         api.get(`/api/interactions/drugs/search?q=${query}`),
+    getFoodWarnings: (drug_names) =>
+        api.post("/api/interactions/food-warnings", { drug_names }),
 };
 
 export const riskService = {
@@ -79,6 +81,15 @@ export const aiService = {
         api.post("/api/ai/recommendations", { assessment_id }),
     searchEnriched: (q) =>
         api.get(`/api/ai/drug-search-enriched?q=${q}`),
+    searchDrugsEnriched: (q) =>
+        api.get(`/api/ai/drug-search-enriched?q=${q}`),
+    explainDirect: (drug_names, interaction_result, risk_breakdown, patient_profile_id = null) =>
+        api.post("/api/ai/explain-direct", {
+            drug_names,
+            interaction_result,
+            risk_breakdown,
+            patient_profile_id
+        }),
 };
 
 export const lifestyleService = {

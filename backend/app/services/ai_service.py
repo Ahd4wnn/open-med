@@ -11,9 +11,19 @@ async def generate_cot_risk_explanation(
     interaction_result: Dict[str, Any],
     patient_profile: Optional[object] = None
 ) -> Dict[str, Any]:
-    """
-    Calls Featherless.ai to generate a 5-step Chain-of-Thought clinical reasoning.
-    """
+    from app.services.openai_service import (
+        generate_cot_explanation_openai
+    )
+    # Try OpenAI first
+    result = await generate_cot_explanation_openai(
+        risk_breakdown,
+        interaction_result,
+        patient_profile
+    )
+    if result.get("steps"):
+        return result
+
+    # Fallback to Featherless if OpenAI fails
     if not settings.FEATHERLESS_API_KEY:
         logger.warning("FEATHERLESS_API_KEY not set. Returning empty CoT explanation.")
         return {"steps": [], "error": "API Key not configured", "raw_response": ""}

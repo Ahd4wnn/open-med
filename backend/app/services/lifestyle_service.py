@@ -150,8 +150,8 @@ def analyze_medications_and_conditions(
         
     # Step 2: Lifestyle impact on existing conditions
     patient_conditions = []
-    if patient_profile and patient_profile.medical_conditions:
-        patient_conditions = [c.strip().lower() for c in patient_profile.medical_conditions.split(",")]
+    if patient_profile and patient_profile.conditions:
+        patient_conditions = [c.strip().lower() for c in patient_profile.conditions.split(",")]
         
     high_relevance_flags = []
     for lf in agent_1_report.get("lifestyle_flags", []):
@@ -224,7 +224,7 @@ async def generate_lifestyle_ai_report(
         return {"report_text": "", "error": "Featherless API Key not configured."}
         
     age = getattr(patient_profile, "age", "Not provided") if patient_profile else "Not provided"
-    conditions = getattr(patient_profile, "medical_conditions", "None listed") if patient_profile and getattr(patient_profile, "medical_conditions", "") else "None listed"
+    conditions = getattr(patient_profile, "conditions", "None listed") if patient_profile and getattr(patient_profile, "conditions", "") else "None listed"
     medications_str = ", ".join(patient_medications)
 
     top_foods = "\n".join([f"- {f['food_item']} with {f['drug']}: {f['effect']} ({f['severity']})" 
@@ -329,7 +329,7 @@ async def run_multi_agent_pipeline(
 ) -> Dict[str, Any]:
     
     # Step 1: Run analyze_drugs
-    interaction_result = await analyze_drugs(drug_names, patient_profile)
+    interaction_result = await analyze_drugs(drug_names)
     
     # Step 2: Get latest risk assessment
     risk_breakdown = {"final_score": 0.0, "risk_category": "Low"}

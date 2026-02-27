@@ -142,3 +142,16 @@ DRUG_ALIASES = {
 def normalize_drug_name(name: str) -> str:
     cleaned_name = name.strip().lower()
     return DRUG_ALIASES.get(cleaned_name, cleaned_name)
+
+def get_local_interaction(drug_a: str, drug_b: str) -> dict | None:
+    norm_a = normalize_drug_name(drug_a)
+    norm_b = normalize_drug_name(drug_b)
+    pair = frozenset([norm_a, norm_b])
+    
+    if pair in DRUG_INTERACTIONS:
+        base = DRUG_INTERACTIONS[pair].copy()
+        base["drug_1"] = norm_a
+        base["drug_2"] = norm_b
+        return base
+        
+    return None

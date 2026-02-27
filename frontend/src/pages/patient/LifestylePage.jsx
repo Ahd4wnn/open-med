@@ -3,49 +3,19 @@ import PatientLayout from '../../components/patient/PatientLayout';
 import Button from '../../components/shared/Button';
 import Input from '../../components/shared/Input';
 import Card from '../../components/shared/Card';
+import FreeTypeInput from '../../components/shared/FreeTypeInput';
+import { Search, X, ChevronDown, Utensils, Plus, Check } from "lucide-react";
 
 const CardHeader = ({ children, className = "" }) => <div className={`mb-2 ${className}`}>{children}</div>;
 const CardTitle = ({ children, className = "" }) => <h3 className={`font-semibold text-[#1D1D1F] ${className}`}>{children}</h3>;
 const CardContent = ({ children, className = "" }) => <div className={`${className}`}>{children}</div>;
 
-const SearchIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-    </svg>
-);
-
-const XIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>
-    </svg>
-);
-
-const ChevronDownIcon = ({ expanded }) => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}>
-        <polyline points="6 9 12 15 18 9"></polyline>
-    </svg>
-);
-
-const ForkKnifeIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"></path>
-        <path d="M7 2v20"></path>
-        <path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"></path>
-    </svg>
-);
-
-const MedicalCrossIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M12 2v20"></path>
-        <path d="M2 12h20"></path>
-    </svg>
-);
-
-const CheckIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#34C759" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-        <polyline points="20 6 9 17 4 12"></polyline>
-    </svg>
-);
+const SearchIcon = () => <Search size={16} />;
+const XIcon = () => <X size={14} />;
+const ChevronDownIcon = ({ expanded }) => <ChevronDown size={16} style={{ transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }} />;
+const ForkKnifeIcon = () => <Utensils size={18} />;
+const MedicalCrossIcon = () => <Plus size={18} />;
+const CheckIcon = () => <Check size={16} color="#34C759" strokeWidth={3} />;
 
 const OptionPill = ({ label, selected, onClick }) => (
     <button
@@ -105,15 +75,17 @@ const LifestylePage = () => {
                 });
                 if (res.ok) {
                     const data = await res.json();
-                    if (data.sleep_hours) setSleepHours(data.sleep_hours);
-                    if (data.sleep_quality) setSleepQuality(data.sleep_quality);
-                    if (data.activity_level) setActivityLevel(data.activity_level);
-                    if (data.diet_type) setDietType(data.diet_type);
-                    if (data.alcohol_units_per_week !== null) setAlcoholUnits(data.alcohol_units_per_week);
-                    if (data.smoking_status) setSmokingStatus(data.smoking_status);
-                    if (data.stress_level) setStressLevel(data.stress_level);
-                    if (data.water_intake_liters !== null) setWaterIntake(data.water_intake_liters);
-                    if (data.food_log) setFoodLog(data.food_log);
+                    if (data) {
+                        if (data.sleep_hours) setSleepHours(data.sleep_hours);
+                        if (data.sleep_quality) setSleepQuality(data.sleep_quality);
+                        if (data.activity_level) setActivityLevel(data.activity_level);
+                        if (data.diet_type) setDietType(data.diet_type);
+                        if (data.alcohol_units_per_week !== null) setAlcoholUnits(data.alcohol_units_per_week);
+                        if (data.smoking_status) setSmokingStatus(data.smoking_status);
+                        if (data.stress_level) setStressLevel(data.stress_level);
+                        if (data.water_intake_liters !== null) setWaterIntake(data.water_intake_liters);
+                        if (data.food_log) setFoodLog(data.food_log);
+                    }
                 }
             } catch (err) {
                 console.error("Failed to load lifestyle log", err);
@@ -122,39 +94,20 @@ const LifestylePage = () => {
         fetchLatestLog();
     }, []);
 
-    // Drug Search Debounce
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            if (searchTerm.length >= 2) {
-                fetchSuggestions(searchTerm);
-            } else {
-                setSuggestions([]);
-            }
-        }, 300);
-        return () => clearTimeout(timer);
-    }, [searchTerm]);
+    // Debounce search - no longer needed with FreeTypeInput but kept for compatibility
 
-    const fetchSuggestions = async (query) => {
-        try {
-            const token = localStorage.getItem('token');
-            const res = await fetch(`http://localhost:8000/api/ai/drug-search-enriched?q=${encodeURIComponent(query)}`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (res.ok) {
-                const data = await res.json();
-                setSuggestions(data.suggestions || []);
-            }
-        } catch (err) {
-            console.error(err);
+    // Search logic replaced by FreeTypeInput
+
+    const addDrug = (drug) => {
+        const dLower = drug.toLowerCase();
+        if (!drugs.includes(dLower) && drugs.length < 20) {
+            setDrugs([...drugs, dLower]);
         }
     };
 
-    const addDrug = (drug) => {
-        if (!drugs.includes(drug) && drugs.length < 20) {
-            setDrugs([...drugs, drug]);
-        }
-        setSearchTerm('');
-        setSuggestions([]);
+    const addPreset = (drugList) => {
+        const newList = [...new Set([...drugs, ...drugList])];
+        setDrugs(newList);
     };
 
     const removeDrug = (drugToRemove) => {
@@ -446,46 +399,35 @@ const LifestylePage = () => {
                         {/* Drug Selection */}
                         <Card>
                             <CardContent className="p-6">
-                                <p className="text-[11px] uppercase text-[#86868B] font-semibold tracking-wider mb-3">MEDICATIONS TO ANALYZE</p>
-                                <div className="space-y-4">
-                                    <div className="relative">
-                                        <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-[#86868B]">
-                                            <SearchIcon />
-                                        </div>
-                                        <input
-                                            type="text"
-                                            className="w-full pl-10 pr-4 py-3 bg-[#F5F5F7] border-0 rounded-lg text-sm focus:ring-2 focus:ring-[#0EA5E9] transition-all outline-none"
-                                            placeholder="Search and add your current medications..."
-                                            value={searchTerm}
-                                            onChange={(e) => setSearchTerm(e.target.value)}
-                                        />
-                                        {suggestions.length > 0 && (
-                                            <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-[#EBEBED] rounded-lg shadow-lg z-50 max-h-48 overflow-y-auto">
-                                                {suggestions.map((s, idx) => (
-                                                    <div
-                                                        key={idx}
-                                                        className="px-4 py-2 hover:bg-[#F5F5F7] cursor-pointer text-sm font-medium text-[#1D1D1F]"
-                                                        onClick={() => addDrug(s)}
-                                                    >
-                                                        {s}
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        )}
-                                    </div>
+                                <FreeTypeInput
+                                    selectedItems={drugs}
+                                    onAdd={addDrug}
+                                    onRemove={removeDrug}
+                                    placeholder="e.g. warfarin, digoxin..."
+                                    label="YOUR MEDICATIONS"
+                                    sublabel="Type your medications and press Enter to add"
+                                    confirmationText="✓ {count} medication(s) ready for analysis"
+                                />
 
-                                    {drugs.length > 0 && (
-                                        <div className="flex flex-wrap gap-2">
-                                            {drugs.map(drug => (
-                                                <div key={drug} className="flex items-center gap-2 px-3 py-1.5 bg-[#F5F5F7] border border-[#EBEBED] rounded-full text-sm font-medium text-[#1D1D1F]">
-                                                    <span className="capitalize">{drug}</span>
-                                                    <button onClick={() => removeDrug(drug)} className="text-[#86868B] hover:text-[#FF3B30] focus:outline-none">
-                                                        <XIcon />
-                                                    </button>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
+                                <div className="mt-4">
+                                    <h3 className="text-[10px] uppercase tracking-wider text-[#86868B] font-semibold mb-2">COMMON MEDICATIONS</h3>
+                                    <div className="flex flex-wrap gap-2">
+                                        <button onClick={() => addPreset(['metformin', 'lisinopril'])} className="bg-[#F5F5F7] border border-[#EBEBED] rounded-lg px-2.5 py-1 text-xs font-medium text-[#1D1D1F] hover:bg-[#EBEBED] transition-colors flex items-center">
+                                            <span className="mr-1 text-[#86868B]">+</span> Metformin + Lisinopril
+                                        </button>
+                                        <button onClick={() => addPreset(['warfarin', 'aspirin'])} className="bg-[#F5F5F7] border border-[#EBEBED] rounded-lg px-2.5 py-1 text-xs font-medium text-[#1D1D1F] hover:bg-[#EBEBED] transition-colors flex items-center">
+                                            <span className="mr-1 text-[#86868B]">+</span> Warfarin + Aspirin
+                                        </button>
+                                        <button onClick={() => addPreset(['simvastatin', 'amlodipine'])} className="bg-[#F5F5F7] border border-[#EBEBED] rounded-lg px-2.5 py-1 text-xs font-medium text-[#1D1D1F] hover:bg-[#EBEBED] transition-colors flex items-center">
+                                            <span className="mr-1 text-[#86868B]">+</span> Simvastatin + Amlodipine
+                                        </button>
+                                        <button onClick={() => addPreset(['metoprolol', 'lisinopril', 'aspirin'])} className="bg-[#F5F5F7] border border-[#EBEBED] rounded-lg px-2.5 py-1 text-xs font-medium text-[#1D1D1F] hover:bg-[#EBEBED] transition-colors flex items-center">
+                                            <span className="mr-1 text-[#86868B]">+</span> Metoprolol + Lisinopril + Aspirin
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-4 mt-6">
 
                                     {analysisError && (
                                         <div className="p-3 bg-red-50 text-red-600 rounded-lg text-sm border border-red-100 mt-2">
@@ -493,9 +435,13 @@ const LifestylePage = () => {
                                         </div>
                                     )}
 
-                                    <Button onClick={runAnalysis} disabled={drugs.length === 0 || isAnalyzing} className="w-full h-11">
-                                        {isAnalyzing ? "Starting Pipeline..." : "Run Multi-Agent Analysis"}
+                                    <Button onClick={runAnalysis} disabled={drugs.length < 1 || isAnalyzing} className="w-full h-12 text-base">
+                                        {isAnalyzing ? "Analyzing your lifestyle..." : "Check My Lifestyle & Medications"}
                                     </Button>
+
+                                    <p className="text-xs text-[#86868B] mt-2 italic text-center">
+                                        Analysis uses your saved lifestyle log. Make sure your log is up to date in the Log tab.
+                                    </p>
                                 </div>
                             </CardContent>
                         </Card>
@@ -544,16 +490,16 @@ const LifestylePage = () => {
                                         <div className="bg-white border border-[#EBEBED] rounded-2xl p-8 flex flex-col items-center justify-center text-center shadow-sm">
                                             <div className="mb-2">
                                                 <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${analysisResult.final_category === 'Severe' ? 'bg-red-100 text-red-800' :
-                                                        analysisResult.final_category === 'Moderate' ? 'bg-yellow-100 text-yellow-800' :
-                                                            'bg-green-100 text-green-800'
+                                                    analysisResult.final_category === 'Moderate' ? 'bg-yellow-100 text-yellow-800' :
+                                                        'bg-green-100 text-green-800'
                                                     }`}>
                                                     {analysisResult.final_category} Risk
                                                 </span>
                                             </div>
                                             <div className="flex items-baseline gap-1 mt-2">
                                                 <span className={`text-6xl font-black tracking-tight ${analysisResult.final_category === 'Severe' ? 'text-red-500' :
-                                                        analysisResult.final_category === 'Moderate' ? 'text-yellow-500' :
-                                                            'text-[#34C759]'
+                                                    analysisResult.final_category === 'Moderate' ? 'text-yellow-500' :
+                                                        'text-[#34C759]'
                                                     }`}>
                                                     {analysisResult.final_combined_score}
                                                 </span>
@@ -618,8 +564,8 @@ const LifestylePage = () => {
                                                     <div className="space-y-3">
                                                         {analysisResult.agent_2_report.cross_referenced_food_risks.map((risk, idx) => (
                                                             <div key={idx} className={`bg-white border p-4 rounded-xl shadow-sm ${risk.severity === 'major' ? 'border-l-4 border-l-red-500' :
-                                                                    risk.severity === 'moderate' ? 'border-l-4 border-l-yellow-400' :
-                                                                        'border-l-4 border-l-green-500'
+                                                                risk.severity === 'moderate' ? 'border-l-4 border-l-yellow-400' :
+                                                                    'border-l-4 border-l-green-500'
                                                                 }`}>
                                                                 <div className="flex items-start justify-between mb-2">
                                                                     <h4 className="font-bold text-[#1D1D1F] capitalize text-sm">{risk.food_item} + {risk.drug}</h4>

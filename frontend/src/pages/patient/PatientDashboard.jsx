@@ -7,6 +7,7 @@ import Badge from '../../components/shared/Badge';
 import LoadingSpinner from '../../components/shared/LoadingSpinner';
 import { useAuth } from '../../context/AuthContext';
 import { patientService, riskService } from '../../services/api';
+import { AlertCircle, AlertTriangle, Check, Pill, ArrowRight, Info, CheckCircle2 } from "lucide-react";
 
 const PatientDashboard = () => {
     const { user } = useAuth();
@@ -18,20 +19,22 @@ const PatientDashboard = () => {
     useEffect(() => {
         const fetchDashboardData = async () => {
             try {
-                // Try to fetch profile, catch 404 silently
-                try {
-                    const res = await patientService.getProfile();
-                    setProfile(res.data);
-                } catch (err) {
-                    if (err.response?.status !== 404) {
-                        console.error("Error fetching profile", err);
-                    }
+                const [profileRes, historyRes] = await Promise.allSettled([
+                    patientService.getProfile(),
+                    riskService.getHistory()
+                ]);
+
+                if (profileRes.status === "fulfilled") {
+                    setProfile(profileRes.value.data);
+                } else {
+                    setProfile(null);
                 }
 
-                // Fetch risk history
-                const res = await riskService.getHistory();
-                setHistory(res.data.slice(0, 5)); // Keep only last 5
-
+                if (historyRes.status === "fulfilled") {
+                    setHistory(historyRes.value.data.slice(0, 5));
+                } else {
+                    setHistory([]);
+                }
             } catch (err) {
                 console.error("Dashboard data fetch failed", err);
             } finally {
@@ -66,6 +69,18 @@ const PatientDashboard = () => {
 
     const latestAssessment = history.length > 0 ? history[0] : null;
 
+    const getScoreColor = (score, category) => {
+        if (category === "Severe" || score >= 55) return "#EF4444";
+        if (category === "Moderate" || score >= 25) return "#F59E0B";
+        return "#10B981";
+    };
+
+    const getLabelColor = (category) => {
+        if (category === "Severe") return "red";
+        if (category === "Moderate") return "yellow";
+        return "green";
+    };
+
     return (
         <PatientLayout>
             <div className="mb-8">
@@ -76,16 +91,19 @@ const PatientDashboard = () => {
             </div>
 
             {/* Profile Completion Banner */}
-            {!profile && (
-                <div className="bg-[#F0F9FF] border border-[#BAE6FD] rounded-xl px-6 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
+            {profile === null && !loading && (
+                <Card className="bg-[#F0F9FF] border border-[#BAE6FD] rounded-xl px-5 py-4 mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                     <div className="flex items-center gap-3">
-                        <svg className="text-[#0EA5E9] shrink-0" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
-                        <p className="text-sm text-[var(--color-text-primary)] font-medium">Complete your health profile to get personalized risk scores.</p>
+                        <AlertCircle className="text-[#0EA5E9] shrink-0" size={18} />
+                        <div>
+                            <p className="text-sm font-[600] text-[var(--color-text-primary)]">Complete your health profile</p>
+                            <p className="text-xs text-[var(--color-text-muted)] mt-0.5">Get personalized risk scores based on your age, kidney and liver function.</p>
+                        </div>
                     </div>
                     <Button size="sm" onClick={() => navigate('/patient/profile')} className="whitespace-nowrap w-full sm:w-auto">
                         Set Up Profile
                     </Button>
-                </div>
+                </Card>
             )}
 
             {/* Latest Assessment Hero */}
@@ -103,15 +121,15 @@ const PatientDashboard = () => {
                                 <div className="flex items-baseline gap-1">
                                     <span
                                         className="text-[64px] font-bold leading-none tracking-tight"
-                                        style={{ color: latestAssessment.label_color }}
+                                        style={{ color: getScoreColor(latestAssessment.risk_score, latestAssessment.risk_category) }}
                                     >
-                                        {latestAssessment.final_risk_score.toFixed(1)}
+                                        {latestAssessment?.risk_score?.toFixed(1) || '0.0'}
                                     </span>
                                     <span className="text-[#86868B] text-[20px] font-medium">/100</span>
                                 </div>
                                 <div className="mt-2">
-                                    <Badge color={latestAssessment.final_risk_category === 'Severe' ? 'red' : latestAssessment.final_risk_category === 'Moderate' ? 'yellow' : 'green'}>
-                                        {latestAssessment.final_risk_category} Risk
+                                    <Badge color={getLabelColor(latestAssessment.risk_category)}>
+                                        {latestAssessment.risk_category} Risk
                                     </Badge>
                                 </div>
                             </div>
@@ -135,21 +153,51 @@ const PatientDashboard = () => {
                         {/* Top Flag / Success */}
                         <div className="mt-5 pt-4 border-t border-[#EBEBED]">
                             {latestAssessment.clinical_flags && latestAssessment.clinical_flags.length > 0 ? (
-                                <div className="flex items-start gap-2">
-                                    <svg className="text-[#FF3B30] shrink-0 mt-0.5" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-                                    <p className="text-sm text-[#FF3B30] font-medium">{latestAssessment.clinical_flags[0]}</p>
-                                </div>
+                                (() => {
+                                    const flag = latestAssessment.clinical_flags[0] || "";
+                                    const flagType = flag.includes("HIGH RISK") || flag.includes("CONTRAINDICATED") || flag.includes("MAJOR")
+                                        ? "danger"
+                                        : flag.includes("MODERATE") || flag.includes("RENAL") || flag.includes("HEPATIC") || flag.includes("ELDERLY") || flag.includes("POLYPHARMACY")
+                                            ? "warning"
+                                            : "info";
+
+                                    return (
+                                        <div className="flex flex-col gap-1">
+                                            <div className="flex items-center gap-2">
+                                                {flagType === "danger" && <AlertTriangle size={14} className="text-red-500 shrink-0" />}
+                                                {flagType === "warning" && <AlertTriangle size={14} className="text-yellow-500 shrink-0" />}
+                                                {flagType === "info" && <Info size={14} className="text-blue-500 shrink-0" />}
+
+                                                <p className={`text-sm font-medium ${flagType === "danger" ? "text-red-600" : flagType === "warning" ? "text-yellow-700" : "text-blue-600"}`}>
+                                                    {flag}
+                                                </p>
+                                            </div>
+                                            {latestAssessment.clinical_flags.length > 1 && (
+                                                <p className="text-xs text-[#86868B] mt-1 ml-5 cursor-pointer hover:underline" onClick={() => navigate('/patient/medications')}>
+                                                    +{latestAssessment.clinical_flags.length - 1} more warnings
+                                                </p>
+                                            )}
+                                        </div>
+                                    );
+                                })()
                             ) : (
-                                <div className="flex items-center gap-2">
-                                    <svg className="text-[#34C759] shrink-0" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                                    <p className="text-sm text-[#34C759] font-medium">No critical flags detected.</p>
-                                </div>
+                                (latestAssessment.risk_score < 25) ? (
+                                    <div className="flex items-center gap-2">
+                                        <CheckCircle2 size={14} className="text-green-500 shrink-0" />
+                                        <p className="text-sm text-green-600 font-medium">No critical flags detected.</p>
+                                    </div>
+                                ) : (
+                                    <div className="flex items-center gap-2">
+                                        <AlertTriangle size={14} className="text-yellow-500 shrink-0" />
+                                        <p className="text-sm text-yellow-700 font-medium">Moderate risk detected. Review your medications.</p>
+                                    </div>
+                                )
                             )}
                         </div>
                     </Card>
                 ) : (
                     <div className="border-2 border-dashed border-[#EBEBED] bg-white rounded-xl py-12 px-6 flex flex-col items-center justify-center text-center">
-                        <svg className="text-[#D1D1D6] mb-4" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M10.5 20.5 7 24l-3-3L.5 17.5M10.5 20.5l4-4L11 13l-4 4-3.5 3.5M10.5 20.5l3.5-3.5"></path><path d="M14.5 16.5l3.5-3.5L14 9l-3.5 3.5"></path><path d="M18 13l3.5-3.5a3.536 3.536 0 0 0-5-5L13 8l5 5z"></path></svg>
+                        <Pill className="text-[#D1D1D6] mb-4" size={48} />
                         <h3 className="text-lg font-bold text-[#1D1D1F]">No assessments yet</h3>
                         <p className="text-[#86868B] mt-1 mb-6">Check your medications for potential interactions.</p>
                         <Button onClick={() => navigate('/patient/medications')}>Run First Check</Button>
@@ -165,24 +213,20 @@ const PatientDashboard = () => {
                         <div className="mb-1">
                             <span className="text-2xl font-bold text-[var(--color-text-primary)]">{profile.egfr ? profile.egfr + " eGFR" : "Not set"}</span>
                         </div>
-                        {profile.egfr ? (
-                            <span className={`text-xs font-medium ${profile.egfr >= 60 ? 'text-[#34C759]' : profile.egfr >= 30 ? 'text-[#FF9500]' : 'text-[#FF3B30]'}`}>
-                                {profile.egfr >= 60 ? "Normal" : profile.egfr >= 30 ? "Reduced" : "Low"}
-                            </span>
-                        ) : (
-                            <span className="text-xs text-[#86868B]">Update profile</span>
-                        )}
+                        <span className={`text-xs font-medium ${!profile.egfr ? 'text-[#86868B]' : profile.egfr >= 60 ? 'text-[#34C759]' : profile.egfr >= 30 ? 'text-[#FF9500]' : 'text-[#FF3B30]'}`}>
+                            {!profile.egfr ? "—" : profile.egfr >= 60 ? "Normal" : profile.egfr >= 30 ? "Reduced" : "Low"}
+                        </span>
                     </Card>
 
                     <Card className="px-5 py-4 flex flex-col justify-between">
                         <h4 className="text-[11px] uppercase tracking-wider text-[var(--color-text-muted)] font-semibold mb-2">Liver Health</h4>
                         <div className="mb-1">
                             <span className="text-2xl font-bold text-[var(--color-text-primary)]">
-                                {!profile.liver_score ? "Not set" : profile.liver_score === 1 ? "Normal" : profile.liver_score === 2 ? "Mild" : "Impaired"}
+                                {profile.liver_score === 1 ? "Normal" : profile.liver_score === 2 ? "Mild" : profile.liver_score === 3 ? "Impaired" : "Not set"}
                             </span>
                         </div>
-                        <span className="text-xs font-medium text-[var(--color-text-muted)]">
-                            {profile.liver_score === 1 ? "No adjustment" : profile.liver_score ? "Affects metabolism" : "Update profile"}
+                        <span className={`text-xs font-medium ${!profile.liver_score ? 'text-[var(--color-text-muted)]' : profile.liver_score === 1 ? 'text-[var(--color-text-muted)]' : profile.liver_score === 2 ? 'text-[#FF9500]' : 'text-[#FF3B30]'}`}>
+                            {!profile.liver_score ? "—" : profile.liver_score === 1 ? "No adjustment" : profile.liver_score === 2 ? "Affects metabolism" : "High impact"}
                         </span>
                     </Card>
 
@@ -191,8 +235,8 @@ const PatientDashboard = () => {
                         <div className="mb-1">
                             <span className="text-2xl font-bold text-[var(--color-text-primary)]">{profile.age ? profile.age + " years" : "Not set"}</span>
                         </div>
-                        <span className="text-xs font-medium text-[var(--color-text-muted)]">
-                            {profile.age >= 65 ? "Enhanced monitoring" : profile.age ? "Standard baseline" : "Update profile"}
+                        <span className={`text-xs font-medium ${!profile.age ? 'text-[var(--color-text-muted)]' : profile.age >= 75 ? 'text-[#FF9500]' : profile.age >= 65 ? 'text-[#FF9500]' : 'text-[var(--color-text-muted)]'}`}>
+                            {!profile.age ? "—" : profile.age >= 75 ? "Enhanced monitoring" : profile.age >= 65 ? "Elderly baseline" : "Standard baseline"}
                         </span>
                     </Card>
                 </div>
@@ -213,15 +257,15 @@ const PatientDashboard = () => {
                                 </div>
                                 <div className="flex items-center gap-4 shrink-0">
                                     <div className="flex flex-col items-end">
-                                        <span className="text-lg font-bold leading-none" style={{ color: item.label_color }}>
-                                            {item.final_risk_score.toFixed(1)}
+                                        <span className="text-lg font-bold leading-none" style={{ color: getScoreColor(item.risk_score, item.risk_category) }}>
+                                            {item?.risk_score?.toFixed(1) || '0.0'}
                                         </span>
-                                        <Badge color={item.final_risk_category === 'Severe' ? 'red' : item.final_risk_category === 'Moderate' ? 'yellow' : 'green'} className="scale-90 origin-right mt-1">
-                                            {item.final_risk_category}
+                                        <Badge color={getLabelColor(item.risk_category)} className="scale-90 origin-right mt-1">
+                                            {item.risk_category}
                                         </Badge>
                                     </div>
                                     <Button variant="ghost" size="sm" className="px-2" onClick={() => navigate('/patient/history')}>
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                                        <ArrowRight size={16} />
                                     </Button>
                                 </div>
                             </div>

@@ -1,0 +1,80 @@
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+openmed_backend  |     await app(scope, receive, sender)
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/starlette/routing.py", line 72, in app
+openmed_backend  |     response = await func(request)
+openmed_backend  |                ^^^^^^^^^^^^^^^^^^^
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/fastapi/routing.py", line 278, in app
+openmed_backend  |     raw_response = await run_endpoint_function(
+openmed_backend  |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/fastapi/routing.py", line 191, in run_endpoint_function
+openmed_backend  |     return await dependant.call(**values)
+openmed_backend  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openmed_backend  |   File "/app/app/api/routes/lifestyle.py", line 125, in analyze_lifestyle
+openmed_backend  |     pipeline_result = await run_multi_agent_pipeline(
+openmed_backend  |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openmed_backend  |   File "/app/app/services/lifestyle_service.py", line 355, in run_multi_agent_pipeline
+openmed_backend  |     agent_2_report = analyze_medications_and_conditions(
+openmed_backend  |                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openmed_backend  |   File "/app/app/services/lifestyle_service.py", line 153, in analyze_medications_and_conditions
+openmed_backend  |     if patient_profile and patient_profile.medical_conditions:
+openmed_backend  |                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openmed_backend  | AttributeError: 'PatientProfile' object has no attribute 'medical_conditions'
+openmed_backend  | Error fetching DDInter for aspirin: 
+openmed_backend  | INFO:     172.18.0.1:35242 - "POST /api/lifestyle/analyze HTTP/1.1" 500 Internal Server Error
+openmed_backend  | ERROR:    Exception in ASGI application
+openmed_backend  | Traceback (most recent call last):
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/uvicorn/protocols/http/httptools_impl.py", line 411, in run_asgi
+openmed_backend  |     result = await app(  # type: ignore[func-returns-value]
+openmed_backend  |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/uvicorn/middleware/proxy_headers.py", line 69, in __call__
+openmed_backend  |     return await self.app(scope, receive, send)
+openmed_backend  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/fastapi/applications.py", line 1054, in __call__
+openmed_backend  |     await super().__call__(scope, receive, send)
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/starlette/applications.py", line 123, in __call__
+openmed_backend  |     await self.middleware_stack(scope, receive, send)
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/starlette/middleware/errors.py", line 186, in __call__
+openmed_backend  |     raise exc
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/starlette/middleware/errors.py", line 164, in __call__
+openmed_backend  |     await self.app(scope, receive, _send)
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/starlette/middleware/cors.py", line 93, in __call__
+openmed_backend  |     await self.simple_response(scope, receive, send, request_headers=headers)
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/starlette/middleware/cors.py", line 148, in simple_response
+openmed_backend  |     await self.app(scope, receive, send)
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/starlette/middleware/exceptions.py", line 65, in __call__
+openmed_backend  |     await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+openmed_backend  |     raise exc
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+openmed_backend  |     await app(scope, receive, sender)
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/starlette/routing.py", line 756, in __call__
+openmed_backend  |     await self.middleware_stack(scope, receive, send)
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/starlette/routing.py", line 776, in app
+openmed_backend  |     await route.handle(scope, receive, send)
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/starlette/routing.py", line 297, in handle
+openmed_backend  |     await self.app(scope, receive, send)
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/starlette/routing.py", line 77, in app
+openmed_backend  |     await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+openmed_backend  |     raise exc
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+openmed_backend  |     await app(scope, receive, sender)
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/starlette/routing.py", line 72, in app
+openmed_backend  |     response = await func(request)
+openmed_backend  |                ^^^^^^^^^^^^^^^^^^^
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/fastapi/routing.py", line 278, in app
+openmed_backend  |     raw_response = await run_endpoint_function(
+openmed_backend  |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openmed_backend  |   File "/usr/local/lib/python3.11/site-packages/fastapi/routing.py", line 191, in run_endpoint_function
+openmed_backend  |     return await dependant.call(**values)
+openmed_backend  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openmed_backend  |   File "/app/app/api/routes/lifestyle.py", line 125, in analyze_lifestyle
+openmed_backend  |     pipeline_result = await run_multi_agent_pipeline(
+openmed_backend  |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openmed_backend  |   File "/app/app/services/lifestyle_service.py", line 355, in run_multi_agent_pipeline
+openmed_backend  |     agent_2_report = analyze_medications_and_conditions(
+openmed_backend  |                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openmed_backend  |   File "/app/app/services/lifestyle_service.py", line 153, in analyze_medications_and_conditions
+openmed_backend  |     if patient_profile and patient_profile.medical_conditions:
+openmed_backend  |                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+openmed_backend  | AttributeError: 'PatientProfile' object has no attribute 'medical_conditions'

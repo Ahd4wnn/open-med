@@ -10,6 +10,7 @@ from app.api.routes.risk import router as risk_router
 from app.api.routes.ai import router as ai_router
 from app.api.routes.pk import router as pk_router
 from app.api.routes.lifestyle import router as lifestyle_router
+from app.api.routes.ocr import router as ocr_router
 
 logger = logging.getLogger(__name__)
 
@@ -50,6 +51,7 @@ app.include_router(risk_router)
 app.include_router(ai_router)
 app.include_router(pk_router)
 app.include_router(lifestyle_router)
+app.include_router(ocr_router)
 
 @app.get("/")
 async def root():

@@ -1,6 +1,7 @@
 import React from 'react';
+import { FlaskConical } from "lucide-react";
 
-const CoTExplanation = ({ steps, loading, error, modelUsed }) => {
+const CoTExplanation = ({ steps, loading, error, modelUsed, deepResearch, deepResearchLoading }) => {
     if (loading) {
         return (
             <div className="py-6 px-2 animate-pulse">
@@ -57,7 +58,64 @@ const CoTExplanation = ({ steps, loading, error, modelUsed }) => {
                 );
             })}
 
-            {modelUsed && (
+            {deepResearchLoading ? (
+                <div className="mt-8 border-t border-[#EBEBED] pt-6 animate-pulse">
+                    <div className="flex items-center mb-4">
+                        <FlaskConical size={16} className="text-[var(--color-accent)] shrink-0" />
+                        <span className="text-[11px] uppercase tracking-wider text-[var(--color-accent)] font-semibold ml-2">DEEP RESEARCH ANALYSIS</span>
+                    </div>
+                    <div className="h-4 bg-[#EBEBED] rounded mb-3 w-full"></div>
+                    <div className="h-4 bg-[#EBEBED] rounded mb-3 w-5/6"></div>
+                    <div className="h-4 bg-[#EBEBED] rounded mb-3 w-4/6"></div>
+                </div>
+            ) : deepResearch?.sections ? (
+                <div className="mt-8 border-t border-[#EBEBED] pt-6">
+                    <div className="flex items-center mb-6">
+                        <FlaskConical size={16} className="text-[var(--color-accent)] shrink-0" />
+                        <h4 className="text-[11px] uppercase tracking-wider text-[var(--color-accent)] font-semibold ml-2">DEEP RESEARCH ANALYSIS</h4>
+                        {deepResearch.model_used && (
+                            <span className="text-xs bg-[var(--color-surface)] border border-[var(--color-border)] rounded-full px-2 py-0.5 ml-auto text-[var(--color-text-muted)]">
+                                {deepResearch.model_used}
+                            </span>
+                        )}
+                    </div>
+
+                    {['pharmacokinetic', 'pharmacodynamic', 'highest_risk', 'monitoring', 'clinical_bottom_line'].map((secKey) => {
+                        const content = deepResearch.sections[secKey];
+                        if (!content) return null;
+
+                        const titleMap = {
+                            pharmacokinetic: "Pharmacokinetic Analysis",
+                            pharmacodynamic: "Pharmacodynamic Analysis",
+                            highest_risk: "⚠ Highest Risk Concern",
+                            monitoring: "Monitoring Parameters",
+                            clinical_bottom_line: "Clinical Bottom Line"
+                        };
+
+                        if (secKey === 'clinical_bottom_line') {
+                            return (
+                                <div key={secKey} className="mb-4 bg-[var(--color-surface)] rounded-xl p-4 border-l-[3px] border-[var(--color-accent)] shadow-sm">
+                                    <h5 className="text-xs uppercase font-semibold text-[var(--color-text-muted)] mb-1.5">{titleMap[secKey]}</h5>
+                                    <p className="text-sm text-[var(--color-text-primary)] font-medium leading-relaxed">{content}</p>
+                                </div>
+                            );
+                        }
+
+                        return (
+                            <div key={secKey} className="mb-5">
+                                <h5 className="text-xs uppercase font-semibold text-[var(--color-text-muted)] mb-1.5">{titleMap[secKey]}</h5>
+                                <p className="text-sm text-[#515154] leading-relaxed whitespace-pre-line">{content}</p>
+                            </div>
+                        );
+                    })}
+                </div>
+            ) : deepResearch?.error ? (
+                <div className="mt-8 border-t border-[#EBEBED] pt-6">
+                    <p className="text-sm text-[#86868B]">Deep research analysis unavailable. {deepResearch.error}</p>
+                </div>
+            ) : null}
+
+            {modelUsed && !deepResearch?.sections && (
                 <div className="mt-8 pt-4 border-t border-[#EBEBED] text-right">
                     <p className="text-[11px] text-[#A1A1A6]">Analysis by {modelUsed}</p>
                 </div>

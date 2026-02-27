@@ -54,7 +54,7 @@ async def assess_risk(
     await db.commit()
     await db.refresh(assessment)
     
-    recommendations = get_recommendations(breakdown["interactions"])
+    recommendations = get_recommendations(interaction_result.get("interactions", []))
     
     return {
         "assessment_id": assessment.id,

@@ -3,34 +3,13 @@ import DoctorLayout from '../../components/doctor/DoctorLayout';
 import Button from '../../components/shared/Button';
 import Input from '../../components/shared/Input';
 import Card from '../../components/shared/Card';
+import FreeTypeInput from '../../components/shared/FreeTypeInput';
+import PatientSelector from '../../components/shared/PatientSelector';
+import { Activity, X, ChevronDown } from "lucide-react";
 
 const CardHeader = ({ children, className = "" }) => <div className={`mb-2 ${className}`}>{children}</div>;
 const CardTitle = ({ children, className = "" }) => <h3 className={`font-semibold text-[#1D1D1F] ${className}`}>{children}</h3>;
 const CardContent = ({ children, className = "" }) => <div className={`${className}`}>{children}</div>;
-
-const ActivityIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
-    </svg>
-);
-
-const SearchIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-    </svg>
-);
-
-const XIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>
-    </svg>
-);
-
-const ChevronDownIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <polyline points="6 9 12 15 18 9"></polyline>
-    </svg>
-);
 
 const LineChart = ({ simulations }) => {
     // Determine max concentration to scale Y axis
@@ -128,7 +107,7 @@ const PKSimulationPage = () => {
 
     const [supportedDrugs, setSupportedDrugs] = useState([]);
     const [showSupported, setShowSupported] = useState(false);
-    const [patientId, setPatientId] = useState('');
+    const [selectedPatient, setSelectedPatient] = useState(null);
 
     const [isSimulating, setIsSimulating] = useState(false);
     const [simResult, setSimResult] = useState(null);
@@ -136,17 +115,7 @@ const PKSimulationPage = () => {
 
     const [expandedAdjustments, setExpandedAdjustments] = useState({});
 
-    // Debounce search
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            if (searchTerm.length >= 2) {
-                fetchSuggestions(searchTerm);
-            } else {
-                setSuggestions([]);
-            }
-        }, 300);
-        return () => clearTimeout(timer);
-    }, [searchTerm]);
+    // Debounce search - no longer needed with FreeTypeInput but kept for later if auto-complete is added.
 
     // Fetch supported drugs on mount
     useEffect(() => {
@@ -167,31 +136,19 @@ const PKSimulationPage = () => {
         fetchSupported();
     }, []);
 
-    const fetchSuggestions = async (query) => {
-        setIsSearching(true);
-        try {
-            const token = localStorage.getItem('token');
-            const res = await fetch(`http://localhost:8000/api/ai/drug-search-enriched?q=${encodeURIComponent(query)}`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (res.ok) {
-                const data = await res.json();
-                setSuggestions(data.suggestions || []);
-            }
-        } catch (err) {
-            console.error(err);
-        } finally {
-            setIsSearching(false);
+    // Replaced search functionality since FreeTypeInput handles typing
+
+    const addDrug = (drug) => {
+        const dLower = drug.toLowerCase();
+        if (!drugs.includes(dLower) && drugs.length < 15) {
+            setDrugs([...drugs, dLower]);
+            setDoses(prev => ({ ...prev, [dLower]: 100 }));
         }
     };
 
-    const addDrug = (drug) => {
-        if (!drugs.includes(drug) && drugs.length < 15) {
-            setDrugs([...drugs, drug]);
-            setDoses(prev => ({ ...prev, [drug]: 100 }));
-        }
-        setSearchTerm('');
-        setSuggestions([]);
+    const addPreset = (drugList, doseMap) => {
+        setDrugs(drugList);
+        setDoses(doseMap);
     };
 
     const removeDrug = (drugToRemove) => {
@@ -220,7 +177,7 @@ const PKSimulationPage = () => {
                 body: JSON.stringify({
                     drug_names: drugs,
                     doses: doses,
-                    patient_profile_id: patientId ? parseInt(patientId) : null
+                    patient_profile_id: selectedPatient ? selectedPatient.profile_id : null
                 })
             });
             const data = await res.json();
@@ -249,78 +206,94 @@ const PKSimulationPage = () => {
 
                     {/* Drug Input */}
                     <Card>
-                        <CardHeader className="pb-4">
-                            <CardTitle className="text-[14px]">Medications To Simulate</CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            <div className="relative">
-                                <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-[#86868B]">
-                                    <SearchIcon />
-                                </div>
-                                <input
-                                    type="text"
-                                    className="w-full pl-10 pr-4 py-2 bg-[#F5F5F7] border-0 rounded-lg text-sm focus:ring-2 focus:ring-[#0EA5E9] transition-all outline-none"
-                                    placeholder="Search drug name (e.g. Warfarin, Aspirin)"
-                                    value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
-                                />
-                                {suggestions.length > 0 && (
-                                    <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-[#EBEBED] rounded-lg shadow-lg z-50 max-h-48 overflow-y-auto">
-                                        {suggestions.map((s, idx) => (
-                                            <div
-                                                key={idx}
-                                                className="px-4 py-2 hover:bg-[#F5F5F7] cursor-pointer text-sm font-medium text-[#1D1D1F]"
-                                                onClick={() => addDrug(s)}
-                                            >
-                                                {s}
+                        <CardContent className="p-6">
+                            <FreeTypeInput
+                                selectedItems={drugs}
+                                onAdd={addDrug}
+                                onRemove={removeDrug}
+                                placeholder="e.g. warfarin, digoxin, amiodarone..."
+                                label="ADD MEDICATIONS"
+                                sublabel="Type a medication name and press Enter to add. Then set the dose for each drug."
+                                hideChips={true}
+                                confirmationText=""
+                            />
+
+                            {drugs.length > 0 && (
+                                <div className="mt-3 space-y-0">
+                                    {drugs.map(drug => (
+                                        <div key={drug} className="flex items-center justify-between py-2 border-b border-[#EBEBED] last:border-0">
+                                            <div className="flex items-center">
+                                                <span className="w-1.5 h-1.5 rounded-full bg-[#0EA5E9] mr-2"></span>
+                                                <span className="text-sm font-medium text-[#1D1D1F] capitalize">{drug}</span>
                                             </div>
-                                        ))}
-                                    </div>
-                                )}
+                                            <div className="flex items-center">
+                                                <input
+                                                    type="number"
+                                                    className="w-[90px] px-2 py-1 bg-white border border-[#EBEBED] rounded-lg text-sm outline-none focus:ring-1 focus:ring-[#0EA5E9] text-right"
+                                                    placeholder="mg"
+                                                    value={doses[drug] || ""}
+                                                    onChange={(e) => updateDose(drug, parseFloat(e.target.value) || 0)}
+                                                />
+                                                <span className="text-xs text-[#86868B] ml-1">mg</span>
+                                                <button onClick={() => removeDrug(drug)} className="text-[#86868B] hover:text-[#FF3B30] transition-colors ml-2 focus:outline-none">
+                                                    <X size={14} />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                    <p className="text-xs text-[#86868B] mt-2">
+                                        Default dose is 100mg if not specified
+                                    </p>
+                                </div>
+                            )}
+
+                            {/* Presets */}
+                            <div className="mt-4">
+                                <h3 className="text-[10px] uppercase tracking-wider text-[#86868B] font-semibold mb-2">
+                                    COMMON REGIMENS
+                                </h3>
+                                <div className="flex flex-wrap gap-2">
+                                    <button onClick={() => addPreset(['warfarin', 'amiodarone'], { warfarin: 5, amiodarone: 200 })} className="bg-[#F5F5F7] border border-[#EBEBED] rounded-lg px-3 py-1.5 text-xs font-medium text-[#1D1D1F] hover:bg-[#EBEBED] transition-colors flex items-center">
+                                        <span className="mr-1 text-[#86868B]">+</span> Warfarin + Amiodarone
+                                    </button>
+                                    <button onClick={() => addPreset(['digoxin', 'amiodarone', 'metoprolol'], { digoxin: 0.25, amiodarone: 200, metoprolol: 50 })} className="bg-[#F5F5F7] border border-[#EBEBED] rounded-lg px-3 py-1.5 text-xs font-medium text-[#1D1D1F] hover:bg-[#EBEBED] transition-colors flex items-center">
+                                        <span className="mr-1 text-[#86868B]">+</span> Digoxin + Amiodarone + Metoprolol
+                                    </button>
+                                    <button onClick={() => addPreset(['simvastatin', 'fluconazole'], { simvastatin: 40, fluconazole: 150 })} className="bg-[#F5F5F7] border border-[#EBEBED] rounded-lg px-3 py-1.5 text-xs font-medium text-[#1D1D1F] hover:bg-[#EBEBED] transition-colors flex items-center">
+                                        <span className="mr-1 text-[#86868B]">+</span> Simvastatin + Fluconazole
+                                    </button>
+                                    <button onClick={() => addPreset(['warfarin', 'fluconazole', 'aspirin'], { warfarin: 5, fluconazole: 150, aspirin: 100 })} className="bg-[#F5F5F7] border border-[#EBEBED] rounded-lg px-3 py-1.5 text-xs font-medium text-[#1D1D1F] hover:bg-[#EBEBED] transition-colors flex items-center">
+                                        <span className="mr-1 text-[#86868B]">+</span> Warfarin + Fluconazole + Aspirin
+                                    </button>
+                                    <button onClick={() => addPreset(['metformin', 'lisinopril', 'metoprolol'], { metformin: 500, lisinopril: 10, metoprolol: 50 })} className="bg-[#F5F5F7] border border-[#EBEBED] rounded-lg px-3 py-1.5 text-xs font-medium text-[#1D1D1F] hover:bg-[#EBEBED] transition-colors flex items-center">
+                                        <span className="mr-1 text-[#86868B]">+</span> Metformin + Lisinopril + Metoprolol
+                                    </button>
+                                </div>
                             </div>
 
-                            <div className="space-y-3">
-                                {drugs.map(drug => (
-                                    <div key={drug} className="flex flex-col gap-2 p-3 bg-[#F5F5F7] rounded-lg border border-[#EBEBED]">
-                                        <div className="flex items-center justify-between">
-                                            <span className="font-semibold text-[#1D1D1F] capitalize">{drug}</span>
-                                            <button onClick={() => removeDrug(drug)} className="text-[#86868B] hover:text-[#FF3B30] transition-colors p-1">
-                                                <XIcon />
-                                            </button>
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                            <label className="text-xs text-[#86868B] font-medium">Dose:</label>
-                                            <input
-                                                type="number"
-                                                className="w-24 px-2 py-1 bg-white border border-[#EBEBED] rounded text-sm outline-none focus:ring-1 focus:ring-[#0EA5E9]"
-                                                placeholder="mg"
-                                                value={doses[drug]}
-                                                onChange={(e) => updateDose(drug, parseFloat(e.target.value) || 0)}
-                                            />
-                                            <span className="text-xs text-[#86868B]">mg</span>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
+                            {drugs.length >= 1 && (
+                                <p className="text-xs font-medium text-[#34C759] mt-3">
+                                    ✓ {drugs.length} medication(s) configured for simulation
+                                </p>
+                            )}
                         </CardContent>
                     </Card>
 
                     <Card>
-                        <CardHeader className="pb-4">
-                            <CardTitle className="text-[14px]">Patient Context (Optional)</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <Input
-                                label="Patient Profile ID"
-                                placeholder="Enter ID to apply renal/hepatic modifiers"
-                                value={patientId}
-                                onChange={(e) => setPatientId(e.target.value)}
+                        <CardContent className="p-6">
+                            <h3 className="text-[11px] uppercase tracking-wider text-[#86868B] font-semibold mb-3">
+                                SELECT PATIENT (Optional)
+                            </h3>
+                            <PatientSelector
+                                selectedPatient={selectedPatient}
+                                onSelectPatient={setSelectedPatient}
                             />
+                            <p className="text-xs text-[#86868B] mt-2">Adjusts simulation for patient's kidney/liver function</p>
                         </CardContent>
                     </Card>
 
-                    <Button onClick={runSimulation} disabled={drugs.length === 0 || isSimulating} className="w-full h-11">
-                        {isSimulating ? "Simulating..." : "Run Simulation"}
+                    <Button onClick={runSimulation} disabled={drugs.length < 1 || isSimulating} className="w-full h-12 text-base">
+                        {isSimulating ? "Simulating drug concentrations..." : "Run PK Simulation"}
                     </Button>
 
                     {error && (
@@ -334,14 +307,14 @@ const PKSimulationPage = () => {
                         <div className="mt-2">
                             <button
                                 onClick={() => setShowSupported(!showSupported)}
-                                className="flex items-center gap-2 text-sm font-medium text-[#86868B] hover:text-[#1D1D1F] transition-colors"
+                                className="flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wider text-[#86868B] hover:text-[#1D1D1F] transition-colors focus:outline-none"
                             >
-                                <ChevronDownIcon /> Supported Drugs ({supportedDrugs.length})
+                                SUPPORTED DRUGS ({supportedDrugs.length}) <ChevronDown size={16} />
                             </button>
                             {showSupported && (
-                                <div className="mt-4 flex flex-wrap gap-2">
+                                <div className="mt-3 flex flex-wrap gap-1">
                                     {supportedDrugs.map(d => (
-                                        <span key={d} className="text-xs bg-[#F5F5F7] border border-[#EBEBED] text-[#1D1D1F] rounded-full px-2 py-1 capitalize">
+                                        <span key={d} className="text-xs bg-white border border-[#EBEBED] text-[#515154] rounded-full px-2 py-0.5 capitalize shadow-sm">
                                             {d}
                                         </span>
                                     ))}
@@ -356,7 +329,7 @@ const PKSimulationPage = () => {
                     {!simResult && !isSimulating && (
                         <div className="flex-1 flex flex-col items-center justify-center border-2 border-dashed border-[#EBEBED] rounded-2xl bg-white p-12 text-center h-full min-h-[400px]">
                             <div className="w-16 h-16 bg-[#F5F5F7] rounded-full flex items-center justify-center mb-6 text-[#86868B]">
-                                <ActivityIcon />
+                                <Activity size={18} />
                             </div>
                             <h3 className="text-lg font-bold text-[#1D1D1F] mb-2">No Simulation Active</h3>
                             <p className="text-sm text-[#86868B] max-w-sm">
@@ -470,7 +443,7 @@ const PKSimulationPage = () => {
                                                     onClick={() => toggleAdjustment(sim.drug_name)}
                                                 >
                                                     <span>Patient Adjustments (×{sim.patient_adjustments.combined_modifier})</span>
-                                                    <ChevronDownIcon />
+                                                    <ChevronDown size={16} />
                                                 </button>
 
                                                 {isExpanded && (
@@ -564,7 +537,7 @@ const PKSimulationPage = () => {
                     )}
                 </div>
             </div>
-        </DoctorLayout>
+        </DoctorLayout >
     );
 };
 

@@ -1,101 +1,73 @@
 import httpx
-import logging
-from typing import Optional, List
+import asyncio
+from typing import Optional
+from app.config import settings
 
-logger = logging.getLogger(__name__)
-
-# The new NLM RxNav Base URL
-RXNAV_BASE_URL = "https://rxnav.nlm.nih.gov/REST"
+RXNAV_BASE = "https://rxnav.nlm.nih.gov/REST"
 
 async def get_rxcui(drug_name: str) -> Optional[str]:
-    """Get the RxNorm Concept Unique Identifier (RxCUI) for a drug name."""
-    url = f"{RXNAV_BASE_URL}/rxcui.json"
-    params = {"name": drug_name, "search": 1}
-    
     try:
-        async with httpx.AsyncClient(timeout=10.0) as client:
-            response = await client.get(url, params=params)
-            response.raise_for_status()
-            data = response.json()
-            
-            id_group = data.get("idGroup", {})
-            rxnorm_ids = id_group.get("rxnormId", [])
-            
-            if rxnorm_ids:
-                return rxnorm_ids[0]
-                
-            return None
-    except Exception as e:
-        logger.error(f"Error fetching RxCUI for {drug_name}: {e}")
+        async with httpx.AsyncClient(timeout=8) as client:
+            r = await client.get(
+                f"{RXNAV_BASE}/rxcui.json",
+                params={"name": drug_name, "search": 1}
+            )
+            data = r.json()
+            ids = (data.get("idGroup", {})
+                      .get("rxnormId", []))
+            return ids[0] if ids else None
+    except Exception:
         return None
 
-async def get_drug_name_from_rxcui(rxcui: str) -> Optional[str]:
-    """Get the normalized drug name from an RxCUI."""
-    url = f"{RXNAV_BASE_URL}/rxcui/{rxcui}/property.json"
-    params = {"propName": "RxNorm Name"}
-    
+async def search_drug_suggestions(query: str) -> list[str]:
     try:
-        async with httpx.AsyncClient(timeout=10.0) as client:
-            response = await client.get(url, params=params)
-            response.raise_for_status()
-            data = response.json()
-            
-            group = data.get("propConceptGroup", {})
-            concepts = group.get("propConcept", [])
-            
-            if concepts:
-                return concepts[0].get("propValue")
-                
-            return None
-    except Exception as e:
-        logger.error(f"Error fetching drug name for RxCUI {rxcui}: {e}")
-        return None
-
-async def search_drug_suggestions(query: str) -> List[str]:
-    """Get spelling suggestions / autocomplete for a drug name query."""
-    if not query or len(query) < 2:
-        return []
-        
-    url = f"{RXNAV_BASE_URL}/spellingsuggestions.json"
-    params = {"name": query}
-    
-    try:
-        async with httpx.AsyncClient(timeout=10.0) as client:
-            response = await client.get(url, params=params)
-            response.raise_for_status()
-            data = response.json()
-            
-            group = data.get("suggestionGroup", {}) or {}
-            suggestion_list = group.get("suggestionList", {}) or {}
-            suggestions = suggestion_list.get("suggestion", []) or []
-            
-            return suggestions[:8]
-    except Exception as e:
-        logger.error(f"Error searching drug suggestions for {query}: {e}")
+        async with httpx.AsyncClient(timeout=8) as client:
+            r = await client.get(
+                f"{RXNAV_BASE}/spellingsuggestions.json",
+                params={"name": query}
+            )
+            data = r.json()
+            suggestions = (data.get("suggestionGroup", {})
+                              .get("suggestionList", {})
+                              .get("suggestion", []))
+            return suggestions[:10] if suggestions else []
+    except Exception:
         return []
 
-async def get_drug_classes(rxcui: str) -> List[str]:
-    """Get the pharmacological classes for a given RxCUI."""
-    url = f"{RXNAV_BASE_URL}/rxclass/class/byRxcui.json"
-    params = {"rxcui": rxcui}
-    
+async def get_drug_classes(rxcui: str) -> list[str]:
     try:
-        async with httpx.AsyncClient(timeout=10.0) as client:
-            response = await client.get(url, params=params)
-            response.raise_for_status()
-            data = response.json()
-            
-            info_list = data.get("rxclassDrugInfoList", {})
-            infos = info_list.get("rxclassDrugInfo", [])
-            
-            class_names = set()
-            for info in infos:
-                concept = info.get("rxclassMinConceptItem", {})
-                class_name = concept.get("className")
-                if class_name:
-                    class_names.add(class_name)
-                    
-            return list(class_names)[:5]
-    except Exception as e:
-        logger.error(f"Error fetching drug classes for RxCUI {rxcui}: {e}")
+        async with httpx.AsyncClient(timeout=8) as client:
+            r = await client.get(
+                f"{RXNAV_BASE}/rxclass/class/byRxcui.json",
+                params={"rxcui": rxcui}
+            )
+            data = r.json()
+            items = (data.get("rxclassDrugInfoList", {})
+                        .get("rxclassDrugInfo", []))
+            classes = list(set(
+                i["rxclassMinConceptItem"]["className"]
+                for i in items
+                if "rxclassMinConceptItem" in i
+            ))
+            return classes[:5]
+    except Exception:
+        return []
+
+async def get_related_drugs(rxcui: str) -> list[str]:
+    try:
+        async with httpx.AsyncClient(timeout=8) as client:
+            r = await client.get(
+                f"{RXNAV_BASE}/rxcui/{rxcui}/related.json",
+                params={"tty": "IN+BN"}
+            )
+            data = r.json()
+            groups = (data.get("relatedGroup", {})
+                         .get("conceptGroup", []))
+            names = []
+            for g in groups:
+                for prop in g.get("conceptProperties", []):
+                    if prop.get("name"):
+                        names.append(prop["name"].lower())
+            return names[:8]
+    except Exception:
         return []

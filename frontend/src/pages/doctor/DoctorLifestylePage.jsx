@@ -1,141 +1,58 @@
 import React, { useState, useEffect } from 'react';
 import DoctorLayout from '../../components/doctor/DoctorLayout';
-import Button from '../../components/shared/Button';
 import Card from '../../components/shared/Card';
+import FreeTypeInput from '../../components/shared/FreeTypeInput';
+import PatientSelector from '../../components/shared/PatientSelector';
+import Button from '../../components/shared/Button';
+import Badge from '../../components/shared/Badge';
+import { Leaf, Utensils, PlusCircle, ChevronDown, AlertCircle, AlertTriangle } from 'lucide-react';
 
-const CardContent = ({ children, className = "" }) => <div className={`${className}`}>{children}</div>;
-
-const ChevronDownIcon = ({ expanded }) => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}>
-        <polyline points="6 9 12 15 18 9"></polyline>
-    </svg>
-);
-
-const SearchIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-    </svg>
-);
-
-const XIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>
-    </svg>
-);
+const LeafIcon = () => <Leaf color="#D1D1D6" size={48} strokeWidth={2} />;
+const ForkIcon = () => <Utensils className="text-[#0EA5E9]" size={18} />;
+const CrossIcon = () => <PlusCircle className="text-[#0EA5E9]" size={18} />;
+const ChevronIcon = ({ expanded }) => <ChevronDown size={16} style={{ transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }} />;
 
 const DoctorLifestylePage = () => {
-    const [patients, setPatients] = useState([]);
     const [selectedPatient, setSelectedPatient] = useState(null);
-    const [log, setLog] = useState(null);
 
-    const [drugs, setDrugs] = useState([]);
-    const [searchTerm, setSearchTerm] = useState('');
-    const [suggestions, setSuggestions] = useState([]);
-    const [isAnalyzing, setIsAnalyzing] = useState(false);
+    const [selectedDrugs, setSelectedDrugs] = useState([]);
+    // State for FreeTypeInput is internal to the component, so we just track the list
+
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
     const [analysisResult, setAnalysisResult] = useState(null);
-    const [analysisError, setAnalysisError] = useState('');
 
-    // UI state
     const [expandedSections, setExpandedSections] = useState({
-        food_changes: false,
-        lifestyle_modifications: false,
-        sleep_and_metabolism: false
+        food_changes: true,
+        lifestyle_modifications: true,
+        sleep_and_metabolism: true,
+        agentDetails: true
     });
 
-    useEffect(() => {
-        fetchPatients();
-    }, []);
-
-    const fetchPatients = async () => {
-        try {
-            const token = localStorage.getItem('token');
-            const res = await fetch('http://localhost:8000/api/patient/profiles', {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (res.ok) {
-                const data = await res.json();
-                setPatients(data);
-            }
-        } catch (err) {
-            console.error("Failed to fetch patients", err);
-        }
-    };
-
-    const fetchPatientLog = async (userId) => {
-        try {
-            // We need a specific endpoint to get a patient's log by user_id. 
-            // Wait, we can add a simple query param to the existing GET /log endpoint if role == doctor.
-            // But right now the backend endpoint just pulls from current_user.id.
-            // Since we didn't build a doctor-specific GET log endpoint, we will just say: "Ask patient to run analysis" or we can pass drugs and patient_profile_id to run Analysis directly. 
-            // The `run_multi_agent_pipeline` uses `current_user.id` for the lifestyle log in the backend route!
-            console.warn("Backend needs a doctor-specific lifestyle GET endpoint or we use the POST /analyze with profile ID to see if it works.");
-        } catch (err) {
-            console.error(err);
-        }
-    };
-
-    // Let's modify the select patient logic
-    const handleSelectPatient = (p) => {
-        setSelectedPatient(p);
-        setAnalysisResult(null);
-        setAnalysisError('');
-        setDrugs([]);
-    };
-
-    // Drug Search Debounce
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            if (searchTerm.length >= 2) {
-                fetchSuggestions(searchTerm);
-            } else {
-                setSuggestions([]);
-            }
-        }, 300);
-        return () => clearTimeout(timer);
-    }, [searchTerm]);
-
-    const fetchSuggestions = async (query) => {
-        try {
-            const token = localStorage.getItem('token');
-            const res = await fetch(`http://localhost:8000/api/ai/drug-search-enriched?q=${encodeURIComponent(query)}`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (res.ok) {
-                const data = await res.json();
-                setSuggestions(data.suggestions || []);
-            }
-        } catch (err) {
-            console.error(err);
-        }
-    };
-
     const addDrug = (drug) => {
-        if (!drugs.includes(drug) && drugs.length < 20) {
-            setDrugs([...drugs, drug]);
+        const dLower = drug.toLowerCase();
+        if (!selectedDrugs.includes(dLower) && selectedDrugs.length < 20) {
+            setSelectedDrugs([...selectedDrugs, dLower]);
         }
-        setSearchTerm('');
-        setSuggestions([]);
     };
 
     const removeDrug = (drugToRemove) => {
-        setDrugs(drugs.filter(d => d !== drugToRemove));
+        setSelectedDrugs(selectedDrugs.filter(d => d !== drugToRemove));
+    };
+
+    const addPreset = (drugList) => {
+        const newList = [...new Set([...selectedDrugs, ...drugList])];
+        setSelectedDrugs(newList);
     };
 
     const runAnalysis = async () => {
-        if (drugs.length === 0 || !selectedPatient) return;
-        setIsAnalyzing(true);
-        setAnalysisError('');
+        if (selectedDrugs.length === 0) return;
+        setLoading(true);
+        setError(null);
         setAnalysisResult(null);
 
         try {
             const token = localStorage.getItem('token');
-            // We use the patient's underlying user_id if the backend allowed it, 
-            // but the backend `analyze` route uses `current_user.id` to look up the lifestyle log.
-            // Wait! The backend route `analyze` uses `current_user.id` to find the LifestyleLog!
-            // That means a doctor CANNOT run the analysis on a patient without a backend change.
-            // Oh no, I need to fix the backend route to look up by patient_profile_id's user_id if doctor!
-
-            // I'll assume the backend is fixed for this component.
             const res = await fetch('http://localhost:8000/api/lifestyle/analyze', {
                 method: 'POST',
                 headers: {
@@ -143,212 +60,347 @@ const DoctorLifestylePage = () => {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    drug_names: drugs,
-                    patient_profile_id: selectedPatient.id
+                    drug_names: selectedDrugs,
+                    patient_user_id: selectedPatient ? selectedPatient.user_id : null,
+                    patient_profile_id: selectedPatient ? selectedPatient.profile_id : null
                 })
             });
             const data = await res.json();
-            if (!res.ok) throw new Error(data.detail || 'Analysis failed. Does the patient have a lifestyle log?');
+            if (!res.ok) throw new Error(data.detail || 'Analysis failed.');
             setAnalysisResult(data);
         } catch (err) {
-            setAnalysisError(err.message);
+            console.error(err);
+            setError(err.message || 'Analysis failed.');
         } finally {
-            setIsAnalyzing(false);
+            setLoading(false);
         }
+    };
+
+    const toggleSection = (section) => {
+        setExpandedSections(prev => ({
+            ...prev,
+            [section]: !prev[section]
+        }));
     };
 
     return (
         <DoctorLayout>
-            <div className="max-w-4xl mx-auto h-full flex flex-col pb-10">
+            <div className="h-full flex flex-col pb-10">
                 <div className="mb-6">
-                    <h1 className="text-3xl font-bold text-[#1D1D1F] tracking-tight">Patient Lifestyle Analysis</h1>
-                    <p className="mt-2 text-[#86868B] text-lg">
-                        Run the multi-agent food and lifestyle interaction pipeline for a specific patient.
-                    </p>
+                    <h1 className="text-3xl font-bold text-[#1D1D1F] tracking-tight">Lifestyle Analysis</h1>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    {/* Sidebar / Patient Selector */}
-                    <div className="col-span-1">
-                        <Card>
-                            <CardContent className="p-4">
-                                <h3 className="font-semibold text-sm text-[#1D1D1F] mb-3 uppercase tracking-wider">Select Patient</h3>
-                                <div className="space-y-2">
-                                    {patients.length === 0 ? (
-                                        <p className="text-sm text-[#86868B]">No patients found.</p>
-                                    ) : (
-                                        patients.map(p => (
-                                            <button
-                                                key={p.id}
-                                                onClick={() => handleSelectPatient(p)}
-                                                className={`w-full text-left p-3 rounded-lg border transition-all text-sm font-medium ${selectedPatient?.id === p.id
-                                                        ? 'bg-[#0EA5E9]/10 border-[#0EA5E9] text-[#0EA5E9]'
-                                                        : 'bg-white border-[#EBEBED] text-[#1D1D1F] hover:bg-[#F5F5F7]'
-                                                    }`}
-                                            >
-                                                Age: {p.age} • w: {p.weight_kg}kg
-                                                {p.medical_conditions && <div className="text-xs text-[#86868B] mt-1 line-clamp-1">{p.medical_conditions}</div>}
-                                            </button>
-                                        ))
-                                    )}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 h-full">
+                    {/* Left Panel */}
+                    <div className="lg:col-span-6 xl:col-span-5 flex flex-col gap-6">
+                        {/* Section 1: Patient Selector */}
+                        <Card className="p-6 overflow-visible relative">
+                            <h3 className="text-[11px] uppercase tracking-wider text-[#86868B] font-semibold mb-3">SELECT PATIENT</h3>
+                            <p className="text-xs text-[#86868B] mb-3">Search and select a patient to analyze</p>
+
+                            <PatientSelector
+                                selectedPatient={selectedPatient}
+                                onSelectPatient={setSelectedPatient}
+                            />
+                        </Card>
+
+                        {/* Section 2: Drug Input */}
+                        <Card className="p-6">
+                            <FreeTypeInput
+                                selectedItems={selectedDrugs}
+                                onAdd={addDrug}
+                                onRemove={removeDrug}
+                                label="MEDICATIONS TO ANALYZE"
+                                sublabel="Type medications and press Enter to add"
+                                confirmationText="✓ {count} medications ready"
+                            />
+
+                            <div className="mt-4">
+                                <h3 className="text-[10px] uppercase tracking-wider text-[#86868B] font-semibold mb-2">QUICK ADD</h3>
+                                <div className="flex flex-wrap gap-2">
+                                    <button onClick={() => addPreset(['warfarin', 'aspirin', 'metformin'])} className="bg-[#F5F5F7] border border-[#EBEBED] rounded-lg px-3 py-1.5 text-xs font-medium text-[#1D1D1F] hover:bg-[#EBEBED] transition-colors flex items-center text-left leading-tight">
+                                        <span className="mr-1 text-[#86868B]">+</span> Warfarin + Aspirin + Metformin
+                                    </button>
+                                    <button onClick={() => addPreset(['amiodarone', 'digoxin', 'warfarin'])} className="bg-[#F5F5F7] border border-[#EBEBED] rounded-lg px-3 py-1.5 text-xs font-medium text-[#1D1D1F] hover:bg-[#EBEBED] transition-colors flex items-center text-left leading-tight">
+                                        <span className="mr-1 text-[#86868B]">+</span> Amiodarone + Digoxin + Warfarin
+                                    </button>
+                                    <button onClick={() => addPreset(['simvastatin', 'amlodipine', 'lisinopril'])} className="bg-[#F5F5F7] border border-[#EBEBED] rounded-lg px-3 py-1.5 text-xs font-medium text-[#1D1D1F] hover:bg-[#EBEBED] transition-colors flex items-center text-left leading-tight">
+                                        <span className="mr-1 text-[#86868B]">+</span> Simvastatin + Amlodipine + Lisinopril
+                                    </button>
+                                    <button onClick={() => addPreset(['metformin', 'lisinopril', 'metoprolol'])} className="bg-[#F5F5F7] border border-[#EBEBED] rounded-lg px-3 py-1.5 text-xs font-medium text-[#1D1D1F] hover:bg-[#EBEBED] transition-colors flex items-center text-left leading-tight">
+                                        <span className="mr-1 text-[#86868B]">+</span> Metformin + Lisinopril + Metoprolol
+                                    </button>
                                 </div>
-                            </CardContent>
+                            </div>
+
+                            <Button onClick={runAnalysis} disabled={selectedDrugs.length < 1 || loading} className="w-full h-12 text-base mt-6">
+                                {loading ? (
+                                    <div className="flex items-center justify-center">
+                                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                                        <span>Running multi-agent analysis...</span>
+                                    </div>
+                                ) : "Run Lifestyle Analysis"}
+                            </Button>
+
+                            {error && (
+                                <div className="mt-4 p-3 bg-red-50 border border-red-100 rounded-lg flex items-start gap-2">
+                                    <AlertCircle className="w-4 h-4 text-red-500 mt-0.5" />
+                                    <span className="text-sm font-medium text-red-800">{String(error).replace("Error: ", "")}</span>
+                                </div>
+                            )}
+
+                            {!selectedPatient && (
+                                <p className="text-xs text-[#FF9F0A] mt-2 italic text-center">
+                                    ⚠ No patient selected — analysis will run without patient profile personalization
+                                </p>
+                            )}
                         </Card>
                     </div>
 
-                    {/* Main Analysis Area */}
-                    <div className="col-span-1 md:col-span-2 space-y-6">
-                        {!selectedPatient ? (
-                            <div className="bg-[#F5F5F7] rounded-xl border border-[#EBEBED] border-dashed p-10 flex flex-col items-center justify-center text-center">
-                                <SearchIcon />
-                                <h3 className="text-[#1D1D1F] font-semibold mt-4">No Patient Selected</h3>
-                                <p className="text-[#86868B] text-sm mt-2 max-w-sm">Select a patient from the list, add their proposed or current medications, and run the multi-agent lifestyle interaction analysis.</p>
+                    {/* Right Panel */}
+                    <div className="lg:col-span-6 xl:col-span-7 flex flex-col gap-6">
+                        {!analysisResult && !loading && (
+                            <div className="flex-1 flex flex-col items-center justify-center border-2 border-dashed border-[#EBEBED] rounded-2xl bg-white p-12 text-center py-16">
+                                <LeafIcon />
+                                <h3 className="text-lg font-semibold text-[#1D1D1F] mt-3">Select a patient and add medications</h3>
+                                <p className="text-sm text-[#86868B] mt-1 max-w-sm leading-relaxed">
+                                    The multi-agent pipeline will analyze food, lifestyle, and medication interactions together.
+                                </p>
                             </div>
-                        ) : (
-                            <>
-                                <Card>
-                                    <CardContent className="p-6">
-                                        <p className="text-[11px] uppercase text-[#86868B] font-semibold tracking-wider mb-3">MEDICATIONS TO TEST</p>
-                                        <div className="space-y-4">
-                                            <div className="relative">
-                                                <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-[#86868B]">
-                                                    <SearchIcon />
-                                                </div>
-                                                <input
-                                                    type="text"
-                                                    className="w-full pl-10 pr-4 py-3 bg-[#F5F5F7] border-0 rounded-lg text-sm focus:ring-2 focus:ring-[#0EA5E9] transition-all outline-none"
-                                                    placeholder="Search and add medications..."
-                                                    value={searchTerm}
-                                                    onChange={(e) => setSearchTerm(e.target.value)}
-                                                />
-                                                {suggestions.length > 0 && (
-                                                    <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-[#EBEBED] rounded-lg shadow-lg z-50 max-h-48 overflow-y-auto">
-                                                        {suggestions.map((s, idx) => (
-                                                            <div
-                                                                key={idx}
-                                                                className="px-4 py-2 hover:bg-[#F5F5F7] cursor-pointer text-sm font-medium text-[#1D1D1F]"
-                                                                onClick={() => addDrug(s)}
-                                                            >
-                                                                {s}
-                                                            </div>
-                                                        ))}
-                                                    </div>
-                                                )}
-                                            </div>
+                        )}
 
-                                            {drugs.length > 0 && (
-                                                <div className="flex flex-wrap gap-2">
-                                                    {drugs.map(drug => (
-                                                        <div key={drug} className="flex items-center gap-2 px-3 py-1.5 bg-[#F5F5F7] border border-[#EBEBED] rounded-full text-sm font-medium text-[#1D1D1F]">
-                                                            <span className="capitalize">{drug}</span>
-                                                            <button onClick={() => removeDrug(drug)} className="text-[#86868B] hover:text-[#FF3B30] focus:outline-none">
-                                                                <XIcon />
-                                                            </button>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            )}
+                        {loading && (
+                            <div className="flex-1 flex flex-col items-center justify-center border border-[#EBEBED] rounded-2xl bg-white p-12 h-[400px]">
+                                <div className="w-8 h-8 border-4 border-[#F5F5F7] border-t-[#0EA5E9] rounded-full animate-spin"></div>
+                                <p className="mt-4 text-sm font-medium text-[#86868B]">Analyzing multi-agent interactions...</p>
+                            </div>
+                        )}
 
-                                            {analysisError && (
-                                                <div className="p-3 bg-red-50 text-red-600 rounded-lg text-sm border border-red-100 mt-2">
-                                                    {analysisError}
-                                                </div>
-                                            )}
-
-                                            <Button onClick={runAnalysis} disabled={drugs.length === 0 || isAnalyzing} className="w-full h-11">
-                                                {isAnalyzing ? "Running Analysis..." : "Run Multi-Agent Analysis"}
-                                            </Button>
+                        {analysisResult && !loading && (
+                            <div className="space-y-4">
+                                {/* Agent Pipeline Status Cards */}
+                                <div className="flex items-center justify-center gap-3">
+                                    <div className="bg-white border border-[#EBEBED] rounded-xl p-4 flex-1 flex flex-col items-center text-center shadow-sm">
+                                        <div className="bg-[#E0F2FE] p-2 rounded-full mb-2">
+                                            <ForkIcon />
                                         </div>
-                                    </CardContent>
+                                        <div className="text-sm font-semibold text-[#1D1D1F] flex items-center justify-center gap-1">
+                                            Food & Lifestyle Agent
+                                            <span className="text-[#34C759] font-bold">✓</span>
+                                        </div>
+                                        <p className="text-xs text-[#86868B] mt-1">
+                                            {analysisResult.agent_1_report?.food_risks?.length || 0} food risks · {analysisResult.agent_1_report?.lifestyle_flags?.length || 0} lifestyle flags
+                                        </p>
+                                    </div>
+
+                                    <div className="text-[#86868B] font-medium px-2">→</div>
+
+                                    <div className="bg-white border border-[#EBEBED] rounded-xl p-4 flex-1 flex flex-col items-center text-center shadow-sm">
+                                        <div className="bg-[#E0F2FE] p-2 rounded-full mb-2">
+                                            <CrossIcon />
+                                        </div>
+                                        <div className="text-sm font-semibold text-[#1D1D1F] flex items-center justify-center gap-1">
+                                            Medical Context Agent
+                                            <span className="text-[#34C759] font-bold">✓</span>
+                                        </div>
+                                        <p className="text-xs text-[#86868B] mt-1">
+                                            Combined score: {analysisResult.agent_2_report?.combined_score}/100
+                                        </p>
+                                    </div>
+                                </div>
+
+                                {/* Combined Risk Score Card */}
+                                <Card className="p-6 text-center shadow-sm border border-[#EBEBED]">
+                                    <div className="flex flex-col items-center justify-center">
+                                        {(() => {
+                                            const score = analysisResult.agent_2_report?.combined_score || 0;
+                                            let colorClass = "text-[#34C759]";
+                                            let catBadge = "Low Risk";
+                                            if (score >= 40) { colorClass = "text-[#FF9F0A]"; catBadge = "Moderate Risk"; }
+                                            if (score >= 70) { colorClass = "text-[#FF3B30]"; catBadge = "High Risk"; }
+
+                                            return (
+                                                <>
+                                                    <div className={`text-[56px] font-bold leading-none ${colorClass}`}>
+                                                        {score}
+                                                    </div>
+                                                    <div className="mt-3">
+                                                        <Badge category={catBadge.split(' ')[0]} />
+                                                    </div>
+                                                </>
+                                            );
+                                        })()}
+                                        <p className="text-xs text-[#86868B] mt-4">
+                                            {selectedDrugs.length} medication(s) analyzed
+                                        </p>
+                                        <p className="text-xs text-[#86868B] italic mt-1">
+                                            Combined medication + lifestyle risk score
+                                        </p>
+                                    </div>
                                 </Card>
 
-                                {analysisResult && (
-                                    <div className="space-y-6 animate-in fade-in duration-500">
+                                {/* AI Lifestyle Report Card */}
+                                <Card className="overflow-hidden">
+                                    <div className="bg-[#F5F5F7] px-6 py-4 flex items-center justify-between border-b border-[#EBEBED]">
+                                        <h3 className="text-[11px] uppercase tracking-wider text-[#0EA5E9] font-bold">AI LIFESTYLE REPORT</h3>
+                                        <span className="text-xs font-medium text-[#86868B]">DeepSeek R1 via Featherless</span>
+                                    </div>
+                                    <div className="p-0">
+                                        {['food_changes', 'lifestyle_modifications', 'sleep_and_metabolism'].map((key) => (
+                                            analysisResult.patient_translation && analysisResult.patient_translation[key] && (
+                                                <div key={key} className="border-b border-[#EBEBED] bg-white last:border-0">
+                                                    <div
+                                                        className="px-6 py-4 flex justify-between items-center cursor-pointer hover:bg-[#F5F5F7] transition-colors"
+                                                        onClick={() => toggleSection(key)}
+                                                    >
+                                                        <h4 className="text-sm font-semibold text-[#1D1D1F] capitalize">
+                                                            {key.replace(/_/g, ' ')}
+                                                        </h4>
+                                                        <div className="text-[#86868B]">
+                                                            <ChevronIcon expanded={expandedSections[key]} />
+                                                        </div>
+                                                    </div>
+                                                    {expandedSections[key] && (
+                                                        <div className="px-6 pb-5">
+                                                            <div className="text-sm text-[#515154] leading-relaxed space-y-3">
+                                                                {analysisResult.patient_translation[key].split('\n').map((para, i) => (
+                                                                    para.trim() ? <p key={i}>{para}</p> : null
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )
+                                        ))}
+                                    </div>
+                                </Card>
 
-                                        {/* Score Banner */}
-                                        <div className="bg-white border border-[#EBEBED] rounded-2xl p-6 flex flex-col items-center justify-center text-center shadow-sm">
-                                            <div className="mb-2">
-                                                <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${analysisResult.final_category === 'Severe' ? 'bg-red-100 text-red-800' :
-                                                        analysisResult.final_category === 'Moderate' ? 'bg-yellow-100 text-yellow-800' :
-                                                            'bg-green-100 text-green-800'
-                                                    }`}>
-                                                    {analysisResult.final_category} Risk
-                                                </span>
+                                {/* Full Agent Details */}
+                                <div className="mt-6">
+                                    <div
+                                        className="flex items-center justify-between cursor-pointer py-2 mb-2"
+                                        onClick={() => toggleSection('agentDetails')}
+                                    >
+                                        <h3 className="font-semibold text-[#1D1D1F]">Agent Analysis Details</h3>
+                                        <button className="text-[#86868B] hover:text-[#1D1D1F] p-1 rounded transition-colors">
+                                            <ChevronIcon expanded={expandedSections.agentDetails} />
+                                        </button>
+                                    </div>
+
+                                    {expandedSections.agentDetails && (
+                                        <div className="space-y-4">
+                                            {/* Agent 1 Details */}
+                                            <div className="bg-[#F5F5F7] rounded-xl p-5 border border-[#EBEBED]">
+                                                <h4 className="text-[11px] uppercase tracking-wider text-[#86868B] font-bold mb-4">AGENT 1 — FOOD & LIFESTYLE</h4>
+
+                                                <div className="mb-5 border-b border-[#EBEBED] pb-4">
+                                                    <h5 className="text-xs font-semibold text-[#1D1D1F] uppercase mb-3">Food Risks</h5>
+                                                    {analysisResult.agent_1_report?.food_risks?.length > 0 ? (
+                                                        <div className="space-y-3">
+                                                            {analysisResult.agent_1_report.food_risks.map((risk, idx) => {
+                                                                const colors = {
+                                                                    "Moderate": "border-[#FF9F0A]",
+                                                                    "Major": "border-[#FF3B30]",
+                                                                    "Minor": "border-[#34C759]"
+                                                                };
+                                                                return (
+                                                                    <div key={idx} className={`pl-3 border-l-4 ${colors[risk.severity] || "border-gray-400"}`}>
+                                                                        <div className="flex items-center gap-2 mb-1">
+                                                                            <span className="text-sm font-semibold text-[#1D1D1F]">{risk.food_item} + {risk.drug}</span>
+                                                                            <Badge category={risk.severity} />
+                                                                        </div>
+                                                                        <p className="text-xs text-[#515154] mb-1">{risk.effect}</p>
+                                                                        <p className="text-xs text-[#86868B] italic">{risk.recommendation}</p>
+                                                                    </div>
+                                                                )
+                                                            })}
+                                                        </div>
+                                                    ) : (
+                                                        <p className="text-sm text-[#86868B]">No food-drug interactions detected.</p>
+                                                    )}
+                                                </div>
+
+                                                <div>
+                                                    <h5 className="text-xs font-semibold text-[#1D1D1F] uppercase mb-3">Lifestyle Flags</h5>
+                                                    {analysisResult.agent_1_report?.lifestyle_flags?.length > 0 ? (
+                                                        <div className="space-y-2">
+                                                            {analysisResult.agent_1_report.lifestyle_flags.map((flag, idx) => (
+                                                                <div key={idx} className="flex flex-col sm:flex-row sm:items-center py-2 border-b border-[#EBEBED] last:border-0 gap-2 sm:gap-0">
+                                                                    <div className="flex items-center">
+                                                                        <span className="text-sm font-medium text-[#1D1D1F] capitalize">{flag.factor.replace(/_/g, ' ')}</span>
+                                                                        <span className="text-[10px] font-bold bg-[#FFF4E5] text-[#FF9F0A] px-1.5 py-0.5 rounded ml-2 whitespace-nowrap">
+                                                                            ×{flag.risk_multiplier}
+                                                                        </span>
+                                                                    </div>
+                                                                    <span className="text-xs text-[#515154] sm:ml-auto ml-0 max-w-xs">{flag.recommendation}</span>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    ) : (
+                                                        <p className="text-sm text-[#86868B]">No problematic lifestyle factors detected.</p>
+                                                    )}
+                                                </div>
                                             </div>
-                                            <div className="flex items-baseline gap-1 mt-2">
-                                                <span className={`text-6xl font-black tracking-tight ${analysisResult.final_category === 'Severe' ? 'text-red-500' :
-                                                        analysisResult.final_category === 'Moderate' ? 'text-yellow-500' :
-                                                            'text-[#34C759]'
-                                                    }`}>
-                                                    {analysisResult.final_combined_score}
-                                                </span>
-                                                <span className="text-2xl font-bold text-[#AEAEB2]">/100</span>
+
+                                            {/* Agent 2 Details */}
+                                            <div className="bg-[#F5F5F7] rounded-xl p-5 border border-[#EBEBED]">
+                                                <h4 className="text-[11px] uppercase tracking-wider text-[#86868B] font-bold mb-4">AGENT 2 — MEDICAL CONTEXT</h4>
+
+                                                <div className="flex flex-wrap gap-4 mb-5 border-b border-[#EBEBED] pb-4">
+                                                    <div className="flex-1 min-w-[100px]">
+                                                        <div className="text-xl font-bold text-[#1D1D1F]">{analysisResult.agent_2_report?.medication_risk_score}</div>
+                                                        <div className="text-[10px] uppercase text-[#86868B] font-semibold mt-1">Medication Risk</div>
+                                                    </div>
+                                                    <div className="flex-1 min-w-[100px]">
+                                                        <div className="text-xl font-bold text-[#FF9F0A]">+{analysisResult.agent_2_report?.lifestyle_risk_contribution}</div>
+                                                        <div className="text-[10px] uppercase text-[#86868B] font-semibold mt-1">Lifestyle Contribution</div>
+                                                    </div>
+                                                    <div className="flex-1 min-w-[100px]">
+                                                        <div className="text-xl font-bold text-[#1D1D1F]">{analysisResult.agent_2_report?.combined_score}/100</div>
+                                                        <div className="text-[10px] uppercase text-[#86868B] font-semibold mt-1">Combined</div>
+                                                    </div>
+                                                </div>
+
+                                                <div>
+                                                    <h5 className="text-[10px] uppercase tracking-wider text-[#86868B] font-bold mb-3">HIGH RELEVANCE FLAGS</h5>
+                                                    {analysisResult.agent_2_report?.high_relevance_flags?.length > 0 ? (
+                                                        <div className="space-y-2">
+                                                            {analysisResult.agent_2_report.high_relevance_flags.map((flag, idx) => (
+                                                                <div key={idx} className="flex items-start">
+                                                                    <AlertTriangle className="w-4 h-4 text-[#FF9F0A] mt-0.5 mr-2 flex-shrink-0" />
+                                                                    <span className="text-sm text-[#515154] leading-snug">{flag}</span>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    ) : (
+                                                        <p className="text-sm text-[#86868B]">No high-relevance lifestyle flags.</p>
+                                                    )}
+                                                </div>
                                             </div>
-                                            <p className="text-xs text-[#86868B] mt-2 font-medium">
-                                                Patient Risk Score Profile
-                                            </p>
                                         </div>
+                                    )}
+                                </div>
 
-                                        {/* Breakdowns */}
-                                        <div className="grid grid-cols-1 gap-6">
-                                            {/* Food Risks */}
-                                            <Card>
-                                                <CardContent className="p-6">
-                                                    <h3 className="font-bold text-[#1D1D1F] text-sm tracking-wider uppercase mb-4">Detected Food-Drug Interactions</h3>
-                                                    {analysisResult.agent_2_report.cross_referenced_food_risks.length === 0 ? (
-                                                        <p className="text-sm text-[#86868B] italic">No major food interactions detected.</p>
-                                                    ) : (
-                                                        <div className="space-y-3">
-                                                            {analysisResult.agent_2_report.cross_referenced_food_risks.map((risk, idx) => (
-                                                                <div key={idx} className={`bg-white border p-4 rounded-xl shadow-sm ${risk.severity === 'major' ? 'border-l-4 border-l-red-500' :
-                                                                        risk.severity === 'moderate' ? 'border-l-4 border-l-yellow-400' :
-                                                                            'border-l-4 border-l-green-500'
-                                                                    }`}>
-                                                                    <div className="flex items-start justify-between mb-2">
-                                                                        <h4 className="font-bold text-[#1D1D1F] capitalize text-sm">{risk.food_item} + {risk.drug}</h4>
-                                                                        {risk.clinically_confirmed && (
-                                                                            <span className="text-[10px] font-bold uppercase bg-blue-100 text-blue-800 px-2 py-0.5 rounded ml-2 whitespace-nowrap">Confirmed</span>
-                                                                        )}
-                                                                    </div>
-                                                                    <p className="text-xs text-[#1D1D1F] mb-1">{risk.effect}</p>
-                                                                    <p className="text-xs font-semibold mt-2 text-[#86868B] italic leading-tight">{risk.recommendation}</p>
-                                                                </div>
-                                                            ))}
-                                                        </div>
-                                                    )}
-                                                </CardContent>
-                                            </Card>
-
-                                            {/* Lifestyle Flags */}
-                                            <Card>
-                                                <CardContent className="p-6">
-                                                    <h3 className="font-bold text-[#1D1D1F] text-sm tracking-wider uppercase mb-4">Lifestyle Risk Factors</h3>
-                                                    {analysisResult.agent_2_report.high_relevance_lifestyle_flags.length === 0 ? (
-                                                        <p className="text-sm text-[#86868B] italic">No major lifestyle flags detected.</p>
-                                                    ) : (
-                                                        <div className="space-y-3">
-                                                            {analysisResult.agent_2_report.high_relevance_lifestyle_flags.map((flag, idx) => (
-                                                                <div key={idx} className={`bg-white border border-[#EBEBED] p-4 rounded-xl shadow-sm ${flag.high_relevance ? 'border-l-4 border-l-orange-500' : 'border-l-4 border-l-[#D1D1D6]'}`}>
-                                                                    <div className="flex items-start justify-between mb-1">
-                                                                        <h4 className="font-bold text-[#1D1D1F] text-sm">{flag.factor}</h4>
-                                                                        <span className="text-[10px] font-bold bg-orange-100 text-orange-800 px-2 py-0.5 rounded ml-2">×{flag.risk_multiplier} Risk</span>
-                                                                    </div>
-                                                                    <p className="text-xs text-[#1D1D1F] mb-3">{flag.recommendation}</p>
-                                                                </div>
-                                                            ))}
-                                                        </div>
-                                                    )}
-                                                </CardContent>
-                                            </Card>
+                                {/* Clinical Flags section */}
+                                {analysisResult.agent_2_report?.clinical_flags?.length > 0 && (
+                                    <div className="mt-4">
+                                        <h3 className="font-semibold text-[#1D1D1F] mb-3">Clinical Flags</h3>
+                                        <div className="space-y-2">
+                                            {analysisResult.agent_2_report.clinical_flags.map((flag, idx) => (
+                                                <div key={idx} className="bg-red-50 border border-red-100 border-l-4 border-l-[#FF3B30] p-3 rounded-lg flex gap-3 shadow-sm items-start">
+                                                    <AlertTriangle className="w-5 h-5 text-[#FF3B30] mt-0.5 flex-shrink-0" />
+                                                    <span className="text-sm text-red-900 font-medium">{flag}</span>
+                                                </div>
+                                            ))}
                                         </div>
                                     </div>
                                 )}
-                            </>
+                            </div>
                         )}
                     </div>
                 </div>
             </div>
-        </DoctorLayout>
+        </DoctorLayout >
     );
 };
 

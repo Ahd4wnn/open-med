@@ -18,6 +18,7 @@ router = APIRouter(prefix="/api/lifestyle", tags=["lifestyle"])
 class AnalyzeRequest(BaseModel):
     drug_names: List[str]
     patient_profile_id: Optional[int] = None
+    patient_user_id: Optional[int] = None
 
 @router.post("/log", response_model=LifestyleLogOut)
 async def create_lifestyle_log(
@@ -44,7 +45,7 @@ async def create_lifestyle_log(
     await db.refresh(log)
     return log
 
-@router.get("/log", response_model=LifestyleLogOut)
+@router.get("/log", response_model=Optional[LifestyleLogOut])
 async def get_latest_lifestyle_log(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user)
@@ -56,8 +57,6 @@ async def get_latest_lifestyle_log(
         .limit(1)
     )
     log = result.scalars().first()
-    if not log:
-        raise HTTPException(status_code=404, detail="No lifestyle log found")
     return log
 
 @router.put("/log", response_model=LifestyleLogOut)
@@ -104,7 +103,12 @@ async def analyze_lifestyle(
     profile = None
     target_user_id = current_user.id
 
-    if payload.patient_profile_id and current_user.role == "doctor":
+    if payload.patient_user_id and current_user.role == "doctor":
+        target_user_id = payload.patient_user_id
+        if payload.patient_profile_id:
+            prof_res = await db.execute(select(PatientProfile).where(PatientProfile.id == payload.patient_profile_id))
+            profile = prof_res.scalars().first()
+    elif payload.patient_profile_id and current_user.role == "doctor":
         prof_res = await db.execute(select(PatientProfile).where(PatientProfile.id == payload.patient_profile_id))
         profile = prof_res.scalars().first()
         if profile:

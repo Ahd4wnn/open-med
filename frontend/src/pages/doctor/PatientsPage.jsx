@@ -6,6 +6,7 @@ import Button from '../../components/shared/Button';
 import Input from '../../components/shared/Input';
 import LoadingSpinner from '../../components/shared/LoadingSpinner';
 import { patientService } from '../../services/api';
+import { Users } from "lucide-react";
 
 const PatientsPage = () => {
     const navigate = useNavigate();
@@ -35,8 +36,8 @@ const PatientsPage = () => {
         } else {
             const lowerQuery = searchQuery.toLowerCase();
             const filtered = patients.filter(p =>
-                (p.user?.full_name || '').toLowerCase().includes(lowerQuery) ||
-                (p.user?.email || '').toLowerCase().includes(lowerQuery)
+                (p.full_name || '').toLowerCase().includes(lowerQuery) ||
+                (p.email || '').toLowerCase().includes(lowerQuery)
             );
             setFilteredPatients(filtered);
         }
@@ -59,64 +60,102 @@ const PatientsPage = () => {
                         onChange={(e) => setSearchQuery(e.target.value)}
                     />
                 </div>
-                <div className="text-sm text-[#86868B]">
+                <div className="text-sm font-medium text-[#86868B]">
                     {filteredPatients.length} {filteredPatients.length === 1 ? 'patient' : 'patients'}
                 </div>
             </div>
 
             {filteredPatients.length === 0 ? (
                 <div className="flex flex-col items-center justify-center p-12 text-center bg-white border border-[#EBEBED] rounded-2xl">
-                    <svg className="text-[#D1D1D6] mb-4" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-                    <h3 className="text-lg font-semibold text-[#1D1D1F]">No patients found</h3>
-                    <p className="text-[#86868B] mt-2">Patients will appear here after they create profiles.</p>
+                    <Users size={48} color="#D1D1D6" className="mb-4" />
+                    <h3 className="text-lg font-semibold text-[#1D1D1F]">No patients registered yet.</h3>
+                    <p className="text-[#86868B] mt-2 text-sm">Patients will appear here once they register.</p>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
                     {filteredPatients.map((patient) => {
-                        const medCount = patient.current_medications?.length || 0;
+                        const medCount = patient.medication_count || '—';
                         const age = patient.age || '—';
                         const egfr = patient.egfr || '—';
 
+                        const dateFormatted = patient.created_at ? new Date(patient.created_at).toLocaleDateString() : '';
+
                         return (
-                            <Card key={patient.id} className="p-5 flex flex-col">
-                                <div className="flex items-center gap-4">
-                                    <div className="w-10 h-10 rounded-full bg-[#F5F5F7] border border-[#EBEBED] flex items-center justify-center text-sm font-semibold text-[#515154]">
-                                        {getInitials(patient.user?.full_name)}
+                            <Card key={patient.user_id} className="p-5 flex flex-col h-full shadow-sm hover:shadow-md transition-shadow">
+                                <div className="flex items-start justify-between">
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-12 h-12 rounded-full bg-[#F5F5F7] border border-[#EBEBED] flex items-center justify-center text-sm font-bold text-[#515154]">
+                                            {getInitials(patient.full_name)}
+                                        </div>
+                                        <div>
+                                            <div className="flex items-center gap-2">
+                                                <h3 className="font-semibold text-base text-[#1D1D1F]">{patient.full_name || 'Unknown Patient'}</h3>
+                                                {!patient.has_profile && (
+                                                    <span className="px-2 py-0.5 rounded-full bg-[#F5F5F7] text-[#86868B] text-[10px] font-semibold uppercase tracking-wider">No Profile</span>
+                                                )}
+                                            </div>
+                                            <p className="text-sm text-[#86868B]">{patient.email || 'No email'}</p>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <h3 className="font-semibold text-sm text-[#1D1D1F]">{patient.user?.full_name || 'Unknown Patient'}</h3>
-                                        <p className="text-xs text-[#86868B]">{patient.user?.email || 'No email'}</p>
-                                    </div>
-                                </div>
-
-                                <div className="border-b border-[#EBEBED] my-4"></div>
-
-                                <div className="grid grid-cols-3 gap-2 text-center mb-4">
-                                    <div>
-                                        <div className="font-semibold text-sm text-[#1D1D1F]">{age}</div>
-                                        <div className="text-[10px] uppercase tracking-wider text-[#86868B] mt-0.5">Age</div>
-                                    </div>
-                                    <div>
-                                        <div className="font-semibold text-sm text-[#1D1D1F]">{egfr}</div>
-                                        <div className="text-[10px] uppercase tracking-wider text-[#86868B] mt-0.5">eGFR</div>
-                                    </div>
-                                    <div>
-                                        <div className="font-semibold text-sm text-[#1D1D1F]">{medCount}</div>
-                                        <div className="text-[10px] uppercase tracking-wider text-[#86868B] mt-0.5">Medications</div>
+                                    <div className="text-xs text-[#AEAEB2] whitespace-nowrap">
+                                        Registered {dateFormatted}
                                     </div>
                                 </div>
 
-                                <div className="mt-auto flex items-end justify-between gap-3">
+                                <div className="border-b border-[#EBEBED] my-5"></div>
+
+                                <div className="grid grid-cols-3 gap-2 text-center mb-5">
+                                    <div className="bg-[#F5F5F7] rounded-lg p-2">
+                                        <div className="font-bold text-sm text-[#1D1D1F]">{age}</div>
+                                        <div className="text-[10px] uppercase tracking-wider text-[#86868B] mt-1">Age</div>
+                                    </div>
+                                    <div className="bg-[#F5F5F7] rounded-lg p-2">
+                                        <div className="font-bold text-sm text-[#1D1D1F]">{egfr}</div>
+                                        <div className="text-[10px] uppercase tracking-wider text-[#86868B] mt-1">eGFR</div>
+                                    </div>
+                                    <div className="bg-[#F5F5F7] rounded-lg p-2">
+                                        <div className="font-bold text-sm text-[#1D1D1F]">{medCount}</div>
+                                        <div className="text-[10px] uppercase tracking-wider text-[#86868B] mt-1">Meds</div>
+                                    </div>
+                                </div>
+
+                                <div className="mt-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pt-1">
                                     <div className="flex-1 min-w-0">
-                                        <p className="text-xs text-[#86868B] truncate" title={patient.known_conditions?.join(', ') || 'No conditions listed'}>
-                                            {patient.known_conditions?.length ? patient.known_conditions.join(', ') : 'No conditions listed'}
-                                        </p>
+                                        {patient.latest_risk_category ? (
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-xs text-[#86868B]">Latest risk:</span>
+                                                <span className={`inline-block px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider ${patient.latest_risk_category === 'Severe' ? 'bg-red-100 text-red-800' :
+                                                    patient.latest_risk_category === 'Moderate' ? 'bg-yellow-100 text-yellow-800' :
+                                                        'bg-green-100 text-green-800'
+                                                    }`}>
+                                                    {patient.latest_risk_category}
+                                                </span>
+                                            </div>
+                                        ) : (
+                                            <p className="text-xs text-[#86868B] italic">No assessment yet</p>
+                                        )}
                                     </div>
                                     <Button
-                                        variant="ghost"
+                                        variant="primary"
                                         size="sm"
-                                        className="shrink-0"
-                                        onClick={() => navigate(`/doctor/analyzer`)} // Note: Analyzer expects selectedDrugs usually, but they can enter the ID manually for now.
+                                        className="w-full sm:w-auto shrink-0"
+                                        onClick={() => navigate("/doctor/analyzer", {
+                                            state: {
+                                                preselectedPatient: {
+                                                    profile_id: patient.profile_id,
+                                                    user_id: patient.user_id,
+                                                    full_name: patient.full_name,
+                                                    age: patient.age,
+                                                    weight_kg: patient.weight_kg,
+                                                    egfr: patient.egfr,
+                                                    liver_score: patient.liver_score,
+                                                    conditions: patient.conditions,
+                                                    medications: patient.medications,
+                                                    latest_risk_category: patient.latest_risk_category,
+                                                    latest_risk_score: patient.latest_risk_score
+                                                }
+                                            }
+                                        })}
                                     >
                                         Analyze
                                     </Button>
