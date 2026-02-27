@@ -28,6 +28,12 @@ const ClockIcon = () => (
     </svg>
 );
 
+const ActivityIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+    </svg>
+);
+
 const DoctorLayout = ({ children }) => {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
@@ -41,6 +47,7 @@ const DoctorLayout = ({ children }) => {
     const navItems = [
         { path: '/doctor/dashboard', label: 'Overview', icon: <GridIcon /> },
         { path: '/doctor/analyzer', label: 'Drug Analyzer', icon: <PillIcon /> },
+        { path: '/doctor/pk-simulation', label: 'PK Simulation', icon: <ActivityIcon /> },
         { path: '/doctor/patients', label: 'Patients', icon: <UsersIcon /> },
         { path: '/doctor/history', label: 'History', icon: <ClockIcon /> },
     ];
@@ -74,8 +81,8 @@ const DoctorLayout = ({ children }) => {
                                 key={item.path}
                                 to={item.path}
                                 className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${isActive
-                                        ? 'bg-[#F5F5F7] text-[#1D1D1F] border-l-2 border-[#0EA5E9]'
-                                        : 'text-[#86868B] hover:bg-[#F5F5F7]'
+                                    ? 'bg-[#F5F5F7] text-[#1D1D1F] border-l-2 border-[#0EA5E9]'
+                                    : 'text-[#86868B] hover:bg-[#F5F5F7]'
                                     }`}
                             >
                                 {item.icon}

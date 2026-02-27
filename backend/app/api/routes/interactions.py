@@ -11,7 +11,9 @@ from app.models.user import User
 from app.models.risk_assessment import RiskAssessment
 from app.services.auth_service import get_current_user
 from app.services.rxnav_service import search_drug_suggestions
+from app.services.ddinter_service import search_ddinter_drugs
 from app.services.interaction_service import analyze_drugs
+import asyncio
 
 router = APIRouter(prefix="/api/interactions", tags=["interactions"])
 
@@ -79,5 +81,19 @@ async def search_drugs(
     q: str = Query(..., min_length=2),
     current_user: User = Depends(get_current_user)
 ):
-    suggestions = await search_drug_suggestions(q)
-    return {"suggestions": suggestions}
+    rxnav_results, ddinter_results = await asyncio.gather(
+        search_drug_suggestions(q),
+        search_ddinter_drugs(q)
+    )
+    
+    # Merge and deduplicate
+    merged = []
+    seen = set()
+    
+    for item in rxnav_results + ddinter_results:
+        lower_item = item.lower()
+        if lower_item not in seen:
+            seen.add(lower_item)
+            merged.append(item.title() if item.islower() else item)
+            
+    return {"suggestions": merged[:10]}

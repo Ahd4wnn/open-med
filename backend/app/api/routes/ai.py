@@ -1,14 +1,14 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from typing import Dict, Any, List
 from sqlalchemy.orm import Session
-from app.api.dependencies import get_current_user, get_db
+from app.database import get_db
+from app.services.auth_service import get_current_user
 from app.models.user import User
 from app.models.risk_assessment import RiskAssessment
 from app.models.patient_profile import PatientProfile
 from app.services.ai_service import generate_cot_risk_explanation, generate_drug_enrichment_summary
 from app.services.openfda_service import enrich_drug_list, get_drug_warnings, search_drug_openfda
 from app.services.recommendation_service import get_recommendations, get_patient_history_recommendations
-from app.services.risk_service import get_history
 import json
 
 router = APIRouter(prefix="/api/ai", tags=["ai"])
@@ -106,7 +106,7 @@ async def get_assessment_recommendations(
         
         history_patterns = None
         if current_user.role == "patient" or assessment.user_id == current_user.id:
-            db_history = get_history(db, assessment.user_id)
+            db_history = db.query(RiskAssessment).filter(RiskAssessment.user_id == assessment.user_id).order_by(RiskAssessment.created_at.desc()).limit(10).all()
             # Reconstruct list of dicts for the service
             history_list = []
             for h in db_history:
@@ -129,35 +129,38 @@ async def get_assessment_recommendations(
 async def drug_search_enriched(
     q: str,
     current_user: User = Depends(get_current_user)
-) -> Dict[str, List[str]]:
+) -> Dict[str, Any]:
     if len(q) < 2:
-        return {"suggestions": []}
+        return {"suggestions": [], "sources": ["RxNorm", "DDInter", "OpenFDA"]}
         
     try:
-        # Import rxnav service locally to avoid circular dependency issues at module level
-        from app.services.rxnav_service import search_drugs
-        
+        from app.services.rxnav_service import search_drug_suggestions
+        from app.services.ddinter_service import search_ddinter_drugs
+        from app.services.openfda_service import search_drug_openfda
         import asyncio
-        # Run both searches concurrently
-        rxnav_task = asyncio.create_task(search_drugs(q))
+        
+        # Run all three searches concurrently
+        rxnav_task = asyncio.create_task(search_drug_suggestions(q))
+        ddinter_task = asyncio.create_task(search_ddinter_drugs(q))
         openfda_task = asyncio.create_task(search_drug_openfda(q))
         
-        await asyncio.gather(rxnav_task, openfda_task, return_exceptions=True)
+        await asyncio.gather(rxnav_task, ddinter_task, openfda_task, return_exceptions=True)
         
-        # We need to await the coroutine returned by search_drugs directly if the architecture requires it, 
-        # but search_drugs is already an async function. Let's handle exceptions cleanly.
-        rxnav_results = await search_drugs(q) if not isinstance(rxnav_task.exception(), Exception) else []
+        rxnav_results = rxnav_task.result() if not isinstance(rxnav_task.exception(), Exception) else []
+        ddinter_results = ddinter_task.result() if not isinstance(ddinter_task.exception(), Exception) else []
         openfda_results = openfda_task.result() if not isinstance(openfda_task.exception(), Exception) else []
         
-        # Merge and deduplicate, prioritizing rxnav matches as they are more rigorous clinical names
-        seen = set([r.lower() for r in rxnav_results])
-        merged = list(rxnav_results)
+        # Merge and deduplicate
+        seen = set()
+        merged = []
         
-        for r in openfda_results:
-            if r.lower() not in seen:
-                seen.add(r.lower())
-                merged.append(r)
+        # Preserving priority order: RxNorm -> DDInter -> OpenFDA
+        for item in rxnav_results + ddinter_results + openfda_results:
+            lower_item = item.lower()
+            if lower_item not in seen:
+                seen.add(lower_item)
+                merged.append(item.title() if item.islower() else item)
                 
-        return {"suggestions": merged[:10]}
+        return {"suggestions": merged[:10], "sources": ["RxNorm", "DDInter", "OpenFDA"]}
     except Exception as e:
-        return {"suggestions": []}
+        return {"suggestions": [], "sources": ["RxNorm", "DDInter", "OpenFDA"]}

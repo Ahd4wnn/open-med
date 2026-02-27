@@ -12,6 +12,7 @@ import PatientDashboard from './pages/patient/PatientDashboard';
 import MedicationsPage from './pages/patient/MedicationsPage';
 import PatientHistoryPage from './pages/patient/PatientHistoryPage';
 import PatientProfilePage from './pages/patient/PatientProfilePage';
+import PKSimulationPage from './pages/doctor/PKSimulationPage';
 
 function App() {
     return (
@@ -43,6 +44,14 @@ function App() {
                 element={
                     <ProtectedRoute allowedRoles={["doctor"]}>
                         <PatientsPage />
+                    </ProtectedRoute>
+                }
+            />
+            <Route
+                path="/doctor/pk-simulation"
+                element={
+                    <ProtectedRoute allowedRoles={["doctor"]}>
+                        <PKSimulationPage />
                     </ProtectedRoute>
                 }
             />
