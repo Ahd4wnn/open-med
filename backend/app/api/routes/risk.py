@@ -91,6 +91,7 @@ async def get_assessment_history(
 
         history_out.append({
             "id": a.id,
+            "drug_names": drugs_list,
             "medications_analyzed": drugs_list,
             "risk_score": a.risk_score,
             "risk_category": a.risk_category,
@@ -129,6 +130,7 @@ async def get_assessment(
     return {
         **RiskAssessmentOut.model_validate(assessment).model_dump(),
         "breakdown": breakdown_dict,
+        "drug_names": json.loads(assessment.medications_analyzed),
         "medications_analyzed": json.loads(assessment.medications_analyzed),
         "label_color": get_risk_label_color(assessment.risk_category),
         "recommendations": recommendations,

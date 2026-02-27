@@ -32,8 +32,8 @@ const MedicationsPage = () => {
 
         searchTimeoutRef.current = setTimeout(async () => {
             try {
-                const data = await aiService.searchDrugsEnriched(searchQuery);
-                setSuggestions(data.suggestions || []);
+                const res = await aiService.searchDrugsEnriched(searchQuery);
+                setSuggestions(res.data.suggestions || []);
             } catch (err) {
                 console.error("Drug search error", err);
             }
@@ -64,14 +64,14 @@ const MedicationsPage = () => {
         try {
             // patientId is null here since we'll rely on the backend 
             // risk assessment combining the authenticated user's profile
-            const data = await riskService.assess(selectedDrugs);
-            setResult(data);
+            const res = await riskService.assess(selectedDrugs);
+            setResult(res.data);
             setActiveTab('summary');
             setCotData(null);
 
             // Automatically fetch CoT analysis for patients to provide the plain-English summary
-            if (data.assessment_id) {
-                fetchCoT(data.assessment_id);
+            if (res.data.assessment_id) {
+                fetchCoT(res.data.assessment_id);
             }
         } catch (err) {
             setError('Analysis failed. Please try again.');
@@ -83,8 +83,8 @@ const MedicationsPage = () => {
     const fetchCoT = async (assessmentId) => {
         setCotLoading(true);
         try {
-            const data = await aiService.explain(assessmentId);
-            setCotData(data);
+            const res = await aiService.explain(assessmentId);
+            setCotData(res.data);
         } catch (err) {
             console.error("CoT fetch error", err);
         } finally {
@@ -203,8 +203,8 @@ const MedicationsPage = () => {
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id)}
                                 className={`px-4 py-3 text-sm font-medium transition-colors border-b-2 -mb-[1px] ${activeTab === tab.id
-                                        ? 'border-[#0EA5E9] text-[#0EA5E9]'
-                                        : 'border-transparent text-[#86868B] hover:text-[#1D1D1F]'
+                                    ? 'border-[#0EA5E9] text-[#0EA5E9]'
+                                    : 'border-transparent text-[#86868B] hover:text-[#1D1D1F]'
                                     }`}
                             >
                                 {tab.label}

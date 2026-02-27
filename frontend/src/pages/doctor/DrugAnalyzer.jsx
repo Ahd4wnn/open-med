@@ -36,8 +36,8 @@ const DrugAnalyzer = () => {
 
         searchTimeoutRef.current = setTimeout(async () => {
             try {
-                const data = await aiService.searchDrugsEnriched(searchQuery);
-                setSuggestions(data.suggestions || []);
+                const res = await aiService.searchDrugsEnriched(searchQuery);
+                setSuggestions(res.data.suggestions || []);
             } catch (err) {
                 console.error("Drug search error", err);
             }
@@ -66,8 +66,8 @@ const DrugAnalyzer = () => {
         setAnalyzing(true);
         try {
             const pId = patientId ? parseInt(patientId, 10) : null;
-            const data = await riskService.assess(selectedDrugs, isNaN(pId) ? null : pId);
-            setResult(data);
+            const res = await riskService.assess(selectedDrugs, isNaN(pId) ? null : pId);
+            setResult(res.data);
             setActiveTab('interactions');
             setCotData(null); // reset AI data for new analysis
             setDrugInfoData({});
@@ -82,8 +82,8 @@ const DrugAnalyzer = () => {
         if (cotData || cotLoading) return;
         setCotLoading(true);
         try {
-            const data = await aiService.explain(assessmentId);
-            setCotData(data);
+            const res = await aiService.explain(assessmentId);
+            setCotData(res.data);
         } catch (err) {
             console.error("CoT fetch error", err);
         } finally {
@@ -96,8 +96,8 @@ const DrugAnalyzer = () => {
 
         setDrugInfoLoading(prev => ({ ...prev, [drugName]: true }));
         try {
-            const data = await aiService.getDrugInfo(drugName);
-            setDrugInfoData(prev => ({ ...prev, [drugName]: data }));
+            const res = await aiService.getDrugInfo(drugName);
+            setDrugInfoData(prev => ({ ...prev, [drugName]: res.data }));
         } catch (err) {
             console.error("Drug info fetch error", err);
         } finally {

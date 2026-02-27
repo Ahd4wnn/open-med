@@ -56,8 +56,8 @@ const HistoryPage = () => {
     useEffect(() => {
         const fetchHistory = async () => {
             try {
-                const data = await riskService.getHistory();
-                setHistory(data);
+                const res = await riskService.getHistory();
+                setHistory(res.data);
             } catch (err) {
                 console.error("Failed to fetch history", err);
             } finally {

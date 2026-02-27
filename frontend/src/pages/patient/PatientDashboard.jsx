@@ -20,8 +20,8 @@ const PatientDashboard = () => {
             try {
                 // Try to fetch profile, catch 404 silently
                 try {
-                    const profileData = await patientService.getProfile();
-                    setProfile(profileData);
+                    const res = await patientService.getProfile();
+                    setProfile(res.data);
                 } catch (err) {
                     if (err.response?.status !== 404) {
                         console.error("Error fetching profile", err);
@@ -29,8 +29,8 @@ const PatientDashboard = () => {
                 }
 
                 // Fetch risk history
-                const historyData = await riskService.getHistory();
-                setHistory(historyData.slice(0, 5)); // Keep only last 5
+                const res = await riskService.getHistory();
+                setHistory(res.data.slice(0, 5)); // Keep only last 5
 
             } catch (err) {
                 console.error("Dashboard data fetch failed", err);

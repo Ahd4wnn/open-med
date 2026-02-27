@@ -17,9 +17,9 @@ const PatientsPage = () => {
     useEffect(() => {
         const fetchPatients = async () => {
             try {
-                const data = await patientService.getAllPatients();
-                setPatients(data);
-                setFilteredPatients(data);
+                const res = await patientService.getAllPatients();
+                setPatients(res.data);
+                setFilteredPatients(res.data);
             } catch (err) {
                 console.error("Failed to load patients", err);
             } finally {

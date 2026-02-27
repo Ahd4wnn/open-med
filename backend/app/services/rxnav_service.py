@@ -65,9 +65,9 @@ async def search_drug_suggestions(query: str) -> List[str]:
             response.raise_for_status()
             data = response.json()
             
-            group = data.get("suggestionGroup", {})
-            suggestion_list = group.get("suggestionList", {})
-            suggestions = suggestion_list.get("suggestion", [])
+            group = data.get("suggestionGroup", {}) or {}
+            suggestion_list = group.get("suggestionList", {}) or {}
+            suggestions = suggestion_list.get("suggestion", []) or []
             
             return suggestions[:8]
     except Exception as e:

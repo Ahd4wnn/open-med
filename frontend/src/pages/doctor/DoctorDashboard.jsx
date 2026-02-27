@@ -17,12 +17,12 @@ const DoctorDashboard = () => {
     useEffect(() => {
         const fetchDashboardData = async () => {
             try {
-                const [summaryData, historyData] = await Promise.all([
+                const [summaryRes, historyRes] = await Promise.all([
                     riskService.getDoctorSummary(),
                     riskService.getHistory()
                 ]);
-                setSummary(summaryData);
-                setHistory(historyData);
+                setSummary(summaryRes.data || []);
+                setHistory(historyRes.data || []);
             } catch (err) {
                 console.error("Dashboard fetch error", err);
                 setError('Failed to load dashboard data.');
