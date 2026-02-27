@@ -1,9 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 from typing import List, Dict, Optional, Any
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
 
-from app.api.dependencies import get_db, get_current_user
+from app.database import get_db
+from app.services.auth_service import get_current_user
 from app.models.user import User
 from app.models.patient_profile import PatientProfile
 from app.services.pk_data import PK_DRUG_DATA
@@ -16,10 +18,14 @@ class SimulateRequest(BaseModel):
     doses: Optional[Dict[str, float]] = None
     patient_profile_id: Optional[int] = None
 
+@router.options("/simulate")
+async def simulate_pk_options():
+    return {}
+
 @router.post("/simulate")
 async def simulate_pk(
     payload: SimulateRequest,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
     if not payload.drug_names or len(payload.drug_names) > 15:
@@ -33,9 +39,11 @@ async def simulate_pk(
     
     profile = None
     if payload.patient_profile_id and current_user.role == "doctor":
-        profile = db.query(PatientProfile).filter(PatientProfile.id == payload.patient_profile_id).first()
+        result = await db.execute(select(PatientProfile).where(PatientProfile.id == payload.patient_profile_id))
+        profile = result.scalars().first()
     else:
-        profile = db.query(PatientProfile).filter(PatientProfile.user_id == current_user.id).first()
+        result = await db.execute(select(PatientProfile).where(PatientProfile.user_id == current_user.id))
+        profile = result.scalars().first()
         
     result = simulate_full_regimen(normalized_names, doses, profile)
     return result

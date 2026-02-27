@@ -21,6 +21,7 @@ const DrugAnalyzer = () => {
     const [cotLoading, setCotLoading] = useState(false);
     const [drugInfoData, setDrugInfoData] = useState({});
     const [drugInfoLoading, setDrugInfoLoading] = useState({});
+    const [result, setResult] = useState(null);
     const searchTimeoutRef = useRef(null);
 
     useEffect(() => {
@@ -276,8 +277,8 @@ const DrugAnalyzer = () => {
                                         key={tab.id}
                                         onClick={() => setActiveTab(tab.id)}
                                         className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 -mb-[1px] ${activeTab === tab.id
-                                                ? 'border-[#0EA5E9] text-[#0EA5E9]'
-                                                : 'border-transparent text-[#86868B] hover:text-[#1D1D1F]'
+                                            ? 'border-[#0EA5E9] text-[#0EA5E9]'
+                                            : 'border-transparent text-[#86868B] hover:text-[#1D1D1F]'
                                             }`}
                                     >
                                         {tab.label}

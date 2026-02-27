@@ -21,32 +21,36 @@ const RegisterPage = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setPasswordError('');
-        setServerError('');
-
+        if (!fullName || !email || !password) {
+            setServerError("All fields are required.");
+            return;
+        }
         if (password !== confirmPassword) {
-            setPasswordError('Passwords do not match');
+            setServerError("Passwords do not match.");
             return;
         }
-
         if (password.length < 6) {
-            setPasswordError('Password must be at least 6 characters');
+            setServerError("Password must be at least 6 characters.");
             return;
         }
-
-        setLoading(true);
-
         try {
-            const data = await authService.register(email, password, fullName, selectedRole);
-            login(data.user, data.access_token);
-
-            if (data.user.role === 'doctor') {
-                navigate('/doctor/dashboard');
+            setLoading(true);
+            setServerError("");
+            const response = await authService.register(
+                email, password, fullName, selectedRole
+            );
+            const { access_token, user } = response.data;
+            login(access_token, user);
+            if (user.role === "doctor") {
+                navigate("/doctor/dashboard");
             } else {
-                navigate('/patient/dashboard');
+                navigate("/patient/dashboard");
             }
         } catch (err) {
-            setServerError(err.response?.data?.detail || 'Failed to create account. Please try again.');
+            setServerError(
+                err.response?.data?.detail ||
+                "Registration failed. Please try again."
+            );
         } finally {
             setLoading(false);
         }
@@ -68,8 +72,8 @@ const RegisterPage = () => {
                         type="button"
                         onClick={() => setSelectedRole('patient')}
                         className={`flex-1 py-1.5 text-sm font-medium rounded-full transition-all duration-200 ${selectedRole === 'patient'
-                                ? 'bg-[var(--color-accent)] text-white shadow-sm'
-                                : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]'
+                            ? 'bg-[var(--color-accent)] text-white shadow-sm'
+                            : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]'
                             }`}
                     >
                         Patient
@@ -78,8 +82,8 @@ const RegisterPage = () => {
                         type="button"
                         onClick={() => setSelectedRole('doctor')}
                         className={`flex-1 py-1.5 text-sm font-medium rounded-full transition-all duration-200 ${selectedRole === 'doctor'
-                                ? 'bg-[var(--color-accent)] text-white shadow-sm'
-                                : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]'
+                            ? 'bg-[var(--color-accent)] text-white shadow-sm'
+                            : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]'
                             }`}
                     >
                         Doctor

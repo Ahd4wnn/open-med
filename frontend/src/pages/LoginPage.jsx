@@ -18,29 +18,26 @@ const LoginPage = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setError('');
-        setLoading(true);
-
+        if (!email || !password) {
+            setError("Please enter email and password.");
+            return;
+        }
         try {
-            const data = await authService.login(email, password);
-            // Wait for auth to set token, but check role internally here too to confirm match
-            // A backend limitation right now is that standard auth doesn't prevent a "patient" from logging in
-            // and getting a token if they clicked "doctor". We will just route based on what they *actually* are.
-            login(data.user, data.access_token);
-
-            const userRole = data.user.role;
-            if (userRole !== selectedRole) {
-                // Just an informational warning to the user, they clicked the wrong tab but are still logged in
-                console.warn(`User clicked ${selectedRole} but is actually a ${userRole}`);
-            }
-
-            if (userRole === 'doctor') {
-                navigate('/doctor/dashboard');
+            setLoading(true);
+            setError("");
+            const response = await authService.login(email, password);
+            const { access_token, user } = response.data;
+            login(access_token, user);
+            if (user.role === "doctor") {
+                navigate("/doctor/dashboard");
             } else {
-                navigate('/patient/dashboard');
+                navigate("/patient/dashboard");
             }
         } catch (err) {
-            setError(err.response?.data?.detail || 'Failed to sign in. Please check your credentials.');
+            setError(
+                err.response?.data?.detail ||
+                "Invalid email or password. Please try again."
+            );
         } finally {
             setLoading(false);
         }
@@ -62,8 +59,8 @@ const LoginPage = () => {
                         type="button"
                         onClick={() => setSelectedRole('patient')}
                         className={`flex-1 py-1.5 text-sm font-medium rounded-full transition-all duration-200 ${selectedRole === 'patient'
-                                ? 'bg-[var(--color-accent)] text-white shadow-sm'
-                                : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]'
+                            ? 'bg-[var(--color-accent)] text-white shadow-sm'
+                            : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]'
                             }`}
                     >
                         Patient
@@ -72,8 +69,8 @@ const LoginPage = () => {
                         type="button"
                         onClick={() => setSelectedRole('doctor')}
                         className={`flex-1 py-1.5 text-sm font-medium rounded-full transition-all duration-200 ${selectedRole === 'doctor'
-                                ? 'bg-[var(--color-accent)] text-white shadow-sm'
-                                : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]'
+                            ? 'bg-[var(--color-accent)] text-white shadow-sm'
+                            : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]'
                             }`}
                     >
                         Doctor

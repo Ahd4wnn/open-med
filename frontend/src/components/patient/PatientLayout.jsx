@@ -21,6 +21,7 @@ const PatientLayout = ({ children }) => {
     const navItems = [
         { path: '/patient/dashboard', label: 'Home' },
         { path: '/patient/medications', label: 'My Medications' },
+        { path: '/patient/lifestyle', label: 'My Lifestyle' },
         { path: '/patient/history', label: 'Risk History' },
         { path: '/patient/profile', label: 'My Profile' },
     ];

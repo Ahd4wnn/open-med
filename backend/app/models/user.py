@@ -16,3 +16,4 @@ class User(Base):
 
     patient_profile = relationship("PatientProfile", back_populates="user", uselist=False)
     risk_assessments = relationship("RiskAssessment", back_populates="user")
+    lifestyle_logs = relationship("LifestyleLog", back_populates="user")

@@ -163,8 +163,8 @@ const DoctorDashboard = () => {
                                 <div className="space-y-3">
                                     {history.slice(0, 5).map((item, idx) => {
                                         const badgeColor = item.final_risk_category === 'Severe' ? 'red' : item.final_risk_category === 'Moderate' ? 'yellow' : 'green';
-                                        const drugList = item.drug_names.join(', ');
-                                        const truncatedDrugs = drugList.length > 32 ? drugList.substring(0, 32) + '...' : drugList;
+                                        const drugList = (item.drug_names || []).join(', ');
+                                        const truncatedDrugs = drugList.length > 32 ? drugList.substring(0, 32) + '...' : drugList || 'Unknown Assessment';
 
                                         return (
                                             <div key={idx} className="flex justify-between items-center pb-3 border-b border-[#EBEBED] last:border-0 last:pb-0">

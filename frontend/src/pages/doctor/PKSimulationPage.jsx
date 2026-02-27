@@ -2,7 +2,11 @@ import React, { useState, useEffect, useRef } from 'react';
 import DoctorLayout from '../../components/doctor/DoctorLayout';
 import Button from '../../components/shared/Button';
 import Input from '../../components/shared/Input';
-import Card, { CardHeader, CardTitle, CardContent } from '../../components/shared/Card';
+import Card from '../../components/shared/Card';
+
+const CardHeader = ({ children, className = "" }) => <div className={`mb-2 ${className}`}>{children}</div>;
+const CardTitle = ({ children, className = "" }) => <h3 className={`font-semibold text-[#1D1D1F] ${className}`}>{children}</h3>;
+const CardContent = ({ children, className = "" }) => <div className={`${className}`}>{children}</div>;
 
 const ActivityIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -45,7 +49,7 @@ const LineChart = ({ simulations }) => {
         <div className="w-full mt-4">
             <h3 className="font-semibold text-[#1D1D1F] mb-4">Plasma Concentration Over Time</h3>
             <div className="relative w-full h-[280px]">
-                <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="w-full h-full overflow-visible">
+                <svg viewBox="-8 0 112 115" preserveAspectRatio="none" className="w-full h-full overflow-visible">
                     {/* Grid Lines */}
                     {[0, 25, 50, 75, 100].map(y => (
                         <line key={`grid-${y}`} x1="0" y1={y} x2="100" y2={y} stroke="#F5F5F7" strokeWidth="0.5" />
@@ -53,12 +57,12 @@ const LineChart = ({ simulations }) => {
 
                     {/* Y-axis labels */}
                     {yLabels.reverse().map((lbl, idx) => (
-                        <text key={`ylbl-${idx}`} x="-2" y={(idx * 25) + 1} fontSize="3" fill="#86868B" textAnchor="end">{lbl}</text>
+                        <text key={`ylbl-${idx}`} x="-2" y={(idx * 25) + 1} fontSize="4" fill="#86868B" textAnchor="end">{lbl}</text>
                     ))}
 
                     {/* X-axis labels */}
                     {xLabels.map(lbl => (
-                        <text key={`xlbl-${lbl}`} x={(lbl / xMax) * 100} y="105" fontSize="3" fill="#86868B" textAnchor="middle">{lbl}h</text>
+                        <text key={`xlbl-${lbl}`} x={(lbl / xMax) * 100} y="108" fontSize="4" fill="#86868B" textAnchor="middle">{lbl}h</text>
                     ))}
 
                     {/* Therapeutic Ranges (Dashed) */}
@@ -87,7 +91,7 @@ const LineChart = ({ simulations }) => {
                         }).join(' ');
 
                         return (
-                            <polyline key={`curve-${sim.drug_name}`} points={points} fill="none" stroke={color} strokeWidth="2.5" strokeLinejoin="round" />
+                            <polyline key={`curve-${sim.drug_name}`} points={points} fill="none" stroke={color} strokeWidth="1" strokeLinejoin="round" />
                         );
                     })}
                 </svg>

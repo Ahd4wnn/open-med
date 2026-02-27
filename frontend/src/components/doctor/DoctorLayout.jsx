@@ -48,6 +48,7 @@ const DoctorLayout = ({ children }) => {
         { path: '/doctor/dashboard', label: 'Overview', icon: <GridIcon /> },
         { path: '/doctor/analyzer', label: 'Drug Analyzer', icon: <PillIcon /> },
         { path: '/doctor/pk-simulation', label: 'PK Simulation', icon: <ActivityIcon /> },
+        { path: '/doctor/lifestyle', label: 'Lifestyle Analysis', icon: <ActivityIcon /> },
         { path: '/doctor/patients', label: 'Patients', icon: <UsersIcon /> },
         { path: '/doctor/history', label: 'History', icon: <ClockIcon /> },
     ];
