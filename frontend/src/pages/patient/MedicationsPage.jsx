@@ -4,7 +4,9 @@ import Card from '../../components/shared/Card';
 import Badge from '../../components/shared/Badge';
 import Button from '../../components/shared/Button';
 import Input from '../../components/shared/Input';
-import { interactionService, riskService } from '../../services/api';
+import CoTExplanation from '../../components/shared/CoTExplanation';
+import RecommendationCard from '../../components/shared/RecommendationCard';
+import { interactionService, riskService, aiService } from '../../services/api';
 
 const MedicationsPage = () => {
     const [searchQuery, setSearchQuery] = useState('');
@@ -13,6 +15,9 @@ const MedicationsPage = () => {
     const [analyzing, setAnalyzing] = useState(false);
     const [result, setResult] = useState(null);
     const [error, setError] = useState('');
+    const [activeTab, setActiveTab] = useState('summary');
+    const [cotData, setCotData] = useState(null);
+    const [cotLoading, setCotLoading] = useState(false);
     const searchTimeoutRef = useRef(null);
 
     useEffect(() => {
@@ -27,8 +32,8 @@ const MedicationsPage = () => {
 
         searchTimeoutRef.current = setTimeout(async () => {
             try {
-                const data = await interactionService.searchDrugs(searchQuery);
-                setSuggestions(data.slice(0, 8));
+                const data = await aiService.searchDrugsEnriched(searchQuery);
+                setSuggestions(data.suggestions || []);
             } catch (err) {
                 console.error("Drug search error", err);
             }
@@ -61,10 +66,29 @@ const MedicationsPage = () => {
             // risk assessment combining the authenticated user's profile
             const data = await riskService.assess(selectedDrugs);
             setResult(data);
+            setActiveTab('summary');
+            setCotData(null);
+
+            // Automatically fetch CoT analysis for patients to provide the plain-English summary
+            if (data.assessment_id) {
+                fetchCoT(data.assessment_id);
+            }
         } catch (err) {
             setError('Analysis failed. Please try again.');
         } finally {
             setAnalyzing(false);
+        }
+    };
+
+    const fetchCoT = async (assessmentId) => {
+        setCotLoading(true);
+        try {
+            const data = await aiService.explain(assessmentId);
+            setCotData(data);
+        } catch (err) {
+            console.error("CoT fetch error", err);
+        } finally {
+            setCotLoading(false);
         }
     };
 
@@ -146,8 +170,8 @@ const MedicationsPage = () => {
             {result && (
                 <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
                     <div className={`rounded-xl p-6 mb-6 flex flex-col items-center text-center border ${result.final_risk_category === 'Low' ? 'bg-[#F4FCE3] border-[#D8F3AA]' :
-                            result.final_risk_category === 'Severe' ? 'bg-[#FFF0F0] border-[#FFD8D8]' :
-                                'bg-[#FFF9EC] border-[#FFE9B8]'
+                        result.final_risk_category === 'Severe' ? 'bg-[#FFF0F0] border-[#FFD8D8]' :
+                            'bg-[#FFF9EC] border-[#FFE9B8]'
                         }`}>
                         {result.final_risk_category === 'Low' ? (
                             <>
@@ -168,43 +192,102 @@ const MedicationsPage = () => {
                         )}
                     </div>
 
-                    {/* Simplified Interactions List */}
-                    {result.interactions.length > 0 && (
-                        <div className="mb-6">
-                            <h3 className="text-sm font-semibold text-[#1D1D1F] mb-3 px-1">What You Should Know</h3>
-                            <div className="space-y-3">
-                                {result.interactions.map((interaction, idx) => {
-                                    const sevColor = interaction.severity === 'Major' || interaction.severity === 'Contraindicated' ? '#FF3B30' :
-                                        interaction.severity === 'Moderate' ? '#FF9500' : '#34C759';
+                    {/* Tabs */}
+                    <div className="flex border-b border-[#EBEBED] mb-6 mt-8">
+                        {[
+                            { id: 'summary', label: 'Safety Overview' },
+                            { id: 'ai_analysis', label: 'AI Deep Dive' },
+                            { id: 'alternatives', label: 'Safer Options' }
+                        ].map(tab => (
+                            <button
+                                key={tab.id}
+                                onClick={() => setActiveTab(tab.id)}
+                                className={`px-4 py-3 text-sm font-medium transition-colors border-b-2 -mb-[1px] ${activeTab === tab.id
+                                        ? 'border-[#0EA5E9] text-[#0EA5E9]'
+                                        : 'border-transparent text-[#86868B] hover:text-[#1D1D1F]'
+                                    }`}
+                            >
+                                {tab.label}
+                            </button>
+                        ))}
+                    </div>
 
-                                    return (
-                                        <Card key={idx} className="relative py-3 px-5 border-l-0 rounded-l-none overflow-hidden">
-                                            <div className="absolute left-0 top-0 bottom-0 w-[4px]" style={{ backgroundColor: sevColor }}></div>
-                                            <div className="flex items-center justify-between mb-1">
-                                                <h4 className="font-semibold text-sm text-[#1D1D1F]">⚠ {interaction.drug1} and {interaction.drug2}</h4>
-                                                <Badge color={sevColor === '#FF3B30' ? 'red' : sevColor === '#FF9500' ? 'yellow' : 'green'}>{interaction.severity}</Badge>
+                    {activeTab === 'summary' && (
+                        <div>
+                            {/* Simplified Interactions List */}
+                            {result.interactions.length > 0 && (
+                                <div className="mb-6">
+                                    <h3 className="text-sm font-semibold text-[#1D1D1F] mb-3 px-1">What You Should Know</h3>
+                                    <div className="space-y-3">
+                                        {result.interactions.map((interaction, idx) => {
+                                            const sevColor = interaction.severity === 'Major' || interaction.severity === 'Contraindicated' ? '#FF3B30' :
+                                                interaction.severity === 'Moderate' ? '#FF9500' : '#34C759';
+
+                                            return (
+                                                <Card key={idx} className="relative py-3 px-5 border-l-0 rounded-l-none overflow-hidden">
+                                                    <div className="absolute left-0 top-0 bottom-0 w-[4px]" style={{ backgroundColor: sevColor }}></div>
+                                                    <div className="flex items-center justify-between mb-1">
+                                                        <h4 className="font-semibold text-sm text-[#1D1D1F]">⚠ {interaction.drug1} and {interaction.drug2}</h4>
+                                                        <Badge color={sevColor === '#FF3B30' ? 'red' : sevColor === '#FF9500' ? 'yellow' : 'green'}>{interaction.severity}</Badge>
+                                                    </div>
+                                                    {/* Patient friendly: Show recommendation. Skip dense mechanism. */}
+                                                    <p className="text-sm text-[#515154] mt-2 leading-relaxed">{interaction.recommendation || interaction.description}</p>
+                                                </Card>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Patient-friendly Clinical Flags */}
+                            {result.clinical_flags && result.clinical_flags.length > 0 && (
+                                <div className="mb-8">
+                                    <h3 className="text-sm font-semibold text-[#1D1D1F] mb-3 px-1">Profile Alerts</h3>
+                                    <div className="space-y-2">
+                                        {result.clinical_flags.map((flag, idx) => (
+                                            <div key={idx} className="bg-[#FFF0F0] border border-[#FFD8D8] rounded-lg p-3 flex gap-3">
+                                                <svg className="text-[#FF3B30] shrink-0 mt-0.5" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                                                <p className="text-sm text-[#1D1D1F] leading-tight">{flag}</p>
                                             </div>
-                                            {/* Patient friendly: Show recommendation. Skip dense mechanism. */}
-                                            <p className="text-sm text-[#515154] mt-2 leading-relaxed">{interaction.recommendation || interaction.description}</p>
-                                        </Card>
-                                    );
-                                })}
-                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     )}
 
-                    {/* Patient-friendly Clinical Flags */}
-                    {result.clinical_flags && result.clinical_flags.length > 0 && (
-                        <div className="mb-8">
-                            <h3 className="text-sm font-semibold text-[#1D1D1F] mb-3 px-1">Profile Alerts</h3>
-                            <div className="space-y-2">
-                                {result.clinical_flags.map((flag, idx) => (
-                                    <div key={idx} className="bg-[#FFF0F0] border border-[#FFD8D8] rounded-lg p-3 flex gap-3">
-                                        <svg className="text-[#FF3B30] shrink-0 mt-0.5" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
-                                        <p className="text-sm text-[#1D1D1F] leading-tight">{flag}</p>
+                    {activeTab === 'ai_analysis' && (
+                        <div className="mb-6">
+                            <h3 className="text-sm font-semibold text-[#1D1D1F] mb-4 px-1">Clinical Pharmacist Analysis</h3>
+                            <Card className="p-6">
+                                <CoTExplanation
+                                    steps={cotData?.steps}
+                                    loading={cotLoading}
+                                    error={cotData?.error}
+                                    modelUsed={cotData?.model_used}
+                                />
+                            </Card>
+                        </div>
+                    )}
+
+                    {activeTab === 'alternatives' && (
+                        <div className="mb-6">
+                            <h3 className="text-sm font-semibold text-[#1D1D1F] mb-4 px-1">Safer Alternatives Options</h3>
+                            {result.recommendations && result.recommendations.length > 0 ? (
+                                <div className="space-y-4">
+                                    {result.recommendations.map((rec, idx) => (
+                                        <RecommendationCard key={idx} recommendation={rec} />
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="bg-[#F4FCE3] border border-[#D8F3AA] rounded-xl p-5 flex gap-4">
+                                    <svg className="text-[#34C759] shrink-0 mt-0.5" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                                    <div>
+                                        <h4 className="font-semibold text-[#1D1D1F]">No safer alternatives needed</h4>
+                                        <p className="text-sm text-[#515154] mt-1">We couldn't find any common safer alternatives that would drastically reduce your interaction risk.</p>
                                     </div>
-                                ))}
-                            </div>
+                                </div>
+                            )}
                         </div>
                     )}
 

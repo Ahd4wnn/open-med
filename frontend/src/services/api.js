@@ -65,6 +65,25 @@ export const riskService = {
     }
 };
 
+export const aiService = {
+    explain: async (assessment_id) => {
+        const response = await api.post('/api/ai/explain', { assessment_id });
+        return response.data;
+    },
+    getDrugInfo: async (drug_name) => {
+        const response = await api.post('/api/ai/drug-info', { drug_name });
+        return response.data;
+    },
+    getRecommendations: async (assessment_id) => {
+        const response = await api.post('/api/ai/recommendations', { assessment_id });
+        return response.data;
+    },
+    searchDrugsEnriched: async (query) => {
+        const response = await api.get(`/api/ai/drug-search-enriched?q=${query}`);
+        return response.data;
+    }
+};
+
 export const patientService = {
     getProfile: async () => {
         const response = await api.get('/api/patient/profile');

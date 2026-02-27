@@ -4,7 +4,9 @@ import Card from '../../components/shared/Card';
 import Badge from '../../components/shared/Badge';
 import Button from '../../components/shared/Button';
 import Input from '../../components/shared/Input';
-import { interactionService, riskService } from '../../services/api';
+import CoTExplanation from '../../components/shared/CoTExplanation';
+import RecommendationCard from '../../components/shared/RecommendationCard';
+import { interactionService, riskService, aiService } from '../../services/api';
 
 const DrugAnalyzer = () => {
     const [searchQuery, setSearchQuery] = useState('');
@@ -12,9 +14,13 @@ const DrugAnalyzer = () => {
     const [selectedDrugs, setSelectedDrugs] = useState([]);
     const [patientId, setPatientId] = useState('');
     const [analyzing, setAnalyzing] = useState(false);
-    const [result, setResult] = useState(null);
     const [error, setError] = useState('');
     const [factorsOpen, setFactorsOpen] = useState(true);
+    const [activeTab, setActiveTab] = useState('interactions');
+    const [cotData, setCotData] = useState(null);
+    const [cotLoading, setCotLoading] = useState(false);
+    const [drugInfoData, setDrugInfoData] = useState({});
+    const [drugInfoLoading, setDrugInfoLoading] = useState({});
     const searchTimeoutRef = useRef(null);
 
     useEffect(() => {
@@ -29,8 +35,8 @@ const DrugAnalyzer = () => {
 
         searchTimeoutRef.current = setTimeout(async () => {
             try {
-                const data = await interactionService.searchDrugs(searchQuery);
-                setSuggestions(data.slice(0, 8));
+                const data = await aiService.searchDrugsEnriched(searchQuery);
+                setSuggestions(data.suggestions || []);
             } catch (err) {
                 console.error("Drug search error", err);
             }
@@ -61,12 +67,51 @@ const DrugAnalyzer = () => {
             const pId = patientId ? parseInt(patientId, 10) : null;
             const data = await riskService.assess(selectedDrugs, isNaN(pId) ? null : pId);
             setResult(data);
+            setActiveTab('interactions');
+            setCotData(null); // reset AI data for new analysis
+            setDrugInfoData({});
         } catch (err) {
             setError(err.response?.data?.detail || 'Analysis failed. Please try again.');
         } finally {
             setAnalyzing(false);
         }
     };
+
+    const fetchCoT = async (assessmentId) => {
+        if (cotData || cotLoading) return;
+        setCotLoading(true);
+        try {
+            const data = await aiService.explain(assessmentId);
+            setCotData(data);
+        } catch (err) {
+            console.error("CoT fetch error", err);
+        } finally {
+            setCotLoading(false);
+        }
+    };
+
+    const fetchDrugInfo = async (drugName) => {
+        if (drugInfoData[drugName] || drugInfoLoading[drugName]) return;
+
+        setDrugInfoLoading(prev => ({ ...prev, [drugName]: true }));
+        try {
+            const data = await aiService.getDrugInfo(drugName);
+            setDrugInfoData(prev => ({ ...prev, [drugName]: data }));
+        } catch (err) {
+            console.error("Drug info fetch error", err);
+        } finally {
+            setDrugInfoLoading(prev => ({ ...prev, [drugName]: false }));
+        }
+    };
+
+    useEffect(() => {
+        if (activeTab === 'ai_reasoning' && result?.assessment_id) {
+            fetchCoT(result.assessment_id);
+        }
+        if (activeTab === 'drug_info' && selectedDrugs.length > 0) {
+            selectedDrugs.forEach(drug => fetchDrugInfo(drug));
+        }
+    }, [activeTab, result, selectedDrugs]);
 
     return (
         <DoctorLayout>
@@ -219,42 +264,142 @@ const DrugAnalyzer = () => {
                                 </div>
                             )}
 
-                            {/* Interactions List */}
-                            <div>
-                                <h3 className="text-sm font-semibold text-[#1D1D1F] mb-3 px-1">Detected Interactions ({result.interactions.length})</h3>
-                                {result.interactions.length === 0 ? (
-                                    <div className="bg-[#F5F5F7] rounded-lg p-4 flex items-center gap-3">
-                                        <svg className="text-[#34C759]" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-                                        <p className="text-sm text-[#515154]">No known interactions detected between these medications.</p>
-                                    </div>
-                                ) : (
-                                    <div className="space-y-3">
-                                        {result.interactions.map((interaction, idx) => {
-                                            let sevColorCode = '#34C759';
-                                            if (interaction.severity === 'Major' || interaction.severity === 'Contraindicated') sevColorCode = '#FF3B30';
-                                            if (interaction.severity === 'Moderate') sevColorCode = '#FF9500';
-
-                                            return (
-                                                <div key={idx} className="bg-white rounded-r-lg border border-l-0 border-[#EBEBED] shadow-sm py-3 px-4 relative">
-                                                    <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-l-lg" style={{ backgroundColor: sevColorCode }}></div>
-
-                                                    <div className="flex flex-wrap justify-between items-start gap-2 mb-2">
-                                                        <h4 className="font-semibold text-sm text-[#1D1D1F]">{interaction.drug1} + {interaction.drug2}</h4>
-                                                        <Badge color={sevColorCode === '#FF3B30' ? 'red' : sevColorCode === '#FF9500' ? 'yellow' : 'green'}>
-                                                            {interaction.severity || 'Unknown'}
-                                                        </Badge>
-                                                    </div>
-                                                    <p className="text-xs text-[#515154] mb-1 leading-snug">{interaction.mechanism || interaction.description}</p>
-                                                    {interaction.recommendation && (
-                                                        <p className="text-xs text-[#86868B] italic leading-snug mb-2">{interaction.recommendation}</p>
-                                                    )}
-                                                    <p className="text-[10px] text-[#A1A1A6] mt-2">Source: {interaction.source}</p>
-                                                </div>
-                                            )
-                                        })}
-                                    </div>
-                                )}
+                            {/* Tabs */}
+                            <div className="flex border-b border-[#EBEBED] mb-6">
+                                {[
+                                    { id: 'interactions', label: 'Interactions' },
+                                    { id: 'ai_reasoning', label: 'AI Reasoning' },
+                                    { id: 'recommendations', label: 'Recommendations' },
+                                    { id: 'drug_info', label: 'Drug Info' }
+                                ].map(tab => (
+                                    <button
+                                        key={tab.id}
+                                        onClick={() => setActiveTab(tab.id)}
+                                        className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 -mb-[1px] ${activeTab === tab.id
+                                                ? 'border-[#0EA5E9] text-[#0EA5E9]'
+                                                : 'border-transparent text-[#86868B] hover:text-[#1D1D1F]'
+                                            }`}
+                                    >
+                                        {tab.label}
+                                    </button>
+                                ))}
                             </div>
+
+                            {/* Tab Content */}
+                            {activeTab === 'interactions' && (
+                                <div>
+                                    <h3 className="text-sm font-semibold text-[#1D1D1F] mb-3 px-1">Detected Interactions ({result.interactions.length})</h3>
+                                    {result.interactions.length === 0 ? (
+                                        <div className="bg-[#F5F5F7] rounded-lg p-4 flex items-center gap-3">
+                                            <svg className="text-[#34C759]" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                                            <p className="text-sm text-[#515154]">No known interactions detected between these medications.</p>
+                                        </div>
+                                    ) : (
+                                        <div className="space-y-3">
+                                            {result.interactions.map((interaction, idx) => {
+                                                let sevColorCode = '#34C759';
+                                                if (interaction.severity === 'Major' || interaction.severity === 'Contraindicated') sevColorCode = '#FF3B30';
+                                                if (interaction.severity === 'Moderate') sevColorCode = '#FF9500';
+
+                                                return (
+                                                    <div key={idx} className="bg-white rounded-r-lg border border-l-0 border-[#EBEBED] shadow-sm py-3 px-4 relative">
+                                                        <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-l-lg" style={{ backgroundColor: sevColorCode }}></div>
+
+                                                        <div className="flex flex-wrap justify-between items-start gap-2 mb-2">
+                                                            <h4 className="font-semibold text-sm text-[#1D1D1F]">{interaction.drug1} + {interaction.drug2}</h4>
+                                                            <Badge color={sevColorCode === '#FF3B30' ? 'red' : sevColorCode === '#FF9500' ? 'yellow' : 'green'}>
+                                                                {interaction.severity || 'Unknown'}
+                                                            </Badge>
+                                                        </div>
+                                                        <p className="text-xs text-[#515154] mb-1 leading-snug">{interaction.mechanism || interaction.description}</p>
+                                                        {interaction.recommendation && (
+                                                            <p className="text-xs text-[#86868B] italic leading-snug mb-2">{interaction.recommendation}</p>
+                                                        )}
+                                                        <p className="text-[10px] text-[#A1A1A6] mt-2">Source: {interaction.source}</p>
+                                                    </div>
+                                                )
+                                            })}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
+                            {activeTab === 'ai_reasoning' && (
+                                <CoTExplanation
+                                    steps={cotData?.steps}
+                                    loading={cotLoading}
+                                    error={cotData?.error}
+                                    modelUsed={cotData?.model_used}
+                                />
+                            )}
+
+                            {activeTab === 'recommendations' && (
+                                <div>
+                                    {result.recommendations && result.recommendations.length > 0 ? (
+                                        <div className="space-y-4">
+                                            {result.recommendations.map((rec, idx) => (
+                                                <RecommendationCard key={idx} recommendation={rec} />
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <div className="bg-[#F4FCE3] border border-[#D8F3AA] rounded-xl p-5 flex gap-4">
+                                            <svg className="text-[#34C759] shrink-0 mt-0.5" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                                            <div>
+                                                <h4 className="font-semibold text-[#1D1D1F]">No safer alternatives needed</h4>
+                                                <p className="text-sm text-[#515154] mt-1">Current medications are optimal based on the detected interaction severity.</p>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
+                            {activeTab === 'drug_info' && (
+                                <div className="space-y-4">
+                                    {selectedDrugs.map(drug => {
+                                        const loading = drugInfoLoading[drug];
+                                        const data = drugInfoData[drug];
+
+                                        return (
+                                            <Card key={drug} className="p-5">
+                                                <h3 className="text-base font-bold text-[#1D1D1F] capitalize mb-3">{drug}</h3>
+
+                                                {loading ? (
+                                                    <div className="animate-pulse space-y-2">
+                                                        <div className="h-4 bg-[#EBEBED] rounded w-3/4"></div>
+                                                        <div className="h-4 bg-[#EBEBED] rounded w-1/2"></div>
+                                                    </div>
+                                                ) : data ? (
+                                                    <div>
+                                                        <p className="text-sm text-[#515154] leading-relaxed mb-4">
+                                                            {data.ai_summary || 'No summary available.'}
+                                                        </p>
+
+                                                        <details className="group">
+                                                            <summary className="text-xs font-semibold text-[#0EA5E9] cursor-pointer mb-2">
+                                                                View Full FDA Data
+                                                            </summary>
+                                                            <div className="text-xs text-[#515154] space-y-3 mt-3 px-3 py-3 bg-[#F5F5F7] rounded-lg">
+                                                                {data.fda_data?.warnings && (
+                                                                    <div><strong className="text-[#1D1D1F]">Warnings:</strong> {data.fda_data.warnings}</div>
+                                                                )}
+                                                                {data.fda_data?.contraindications && (
+                                                                    <div><strong className="text-[#1D1D1F]">Contraindications:</strong> {data.fda_data.contraindications}</div>
+                                                                )}
+                                                                {data.fda_data?.drug_class?.length > 0 && (
+                                                                    <div><strong className="text-[#1D1D1F]">Class:</strong> {data.fda_data.drug_class.join(', ')}</div>
+                                                                )}
+                                                                {data.fda_data?.route?.length > 0 && (
+                                                                    <div><strong className="text-[#1D1D1F]">Route:</strong> {data.fda_data.route.join(', ')}</div>
+                                                                )}
+                                                            </div>
+                                                        </details>
+                                                    </div>
+                                                ) : null}
+                                            </Card>
+                                        );
+                                    })}
+                                </div>
+                            )}
 
                         </div>
                     )}
